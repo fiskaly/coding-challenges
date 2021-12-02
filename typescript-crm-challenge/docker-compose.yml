@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+
+  backend:
+    build: ./backend
+    ports:
+      - '3001:3001'
+    command: npm run start
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3001
+
+  frontend:
+    build: ./frontend
+    ports:
+      - '3000:3000'

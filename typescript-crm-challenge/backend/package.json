@@ -1,0 +1,77 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "ts-node-dev --respawn src/server.ts",
+    "start": "node --es-module-specifier-resolution=node build/server.js",
+    "lint": "eslint . --ext .ts"
+  },
+  "engines": {
+    "node": "=15.13"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/html-entities": "^1.3.4",
+    "@types/node": "^16.11.11",
+    "@types/nodemailer": "^6.4.4",
+    "@typescript-eslint/eslint-plugin": "^5.5.0",
+    "@typescript-eslint/parser": "^5.5.0",
+    "eslint": "^8.3.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.5.0",
+    "ts-node": "^10.4.0",
+    "ts-node-dev": "^1.1.8",
+    "tslint": "^6.1.3",
+    "typescript": "^4.5.2"
+  },
+  "dependencies": {
+    "axios": "^0.24.0",
+    "dotenv": "^10.0.0",
+    "env-schema": "^3.5.0",
+    "fastify": "^3.24.1",
+    "fastify-cors": "^6.0.2",
+    "fastify-http-proxy": "^6.2.1",
+    "fastify-multipart": "^5.1.0",
+    "fastify-plugin": "^3.0.0",
+    "fastify-reply-from": "^6.4.1",
+    "fastify-static": "^4.5.0",
+    "http": "0.0.1-security",
+    "http-errors": "^1.8.1",
+    "knex": "^0.95.14",
+    "make-promises-safe": "^5.1.0"
+  },
+  "prettier": {
+    "arrowParens": "always",
+    "endOfLine": "lf",
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "all"
+  },
+  "eslintConfig": {
+    "parser": "@typescript-eslint/parser",
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 5,
+      "sourceType": "module"
+    },
+    "rules": {
+      "camelcase": "off",
+      "@typescript-eslint/camelcase": "off",
+      "@typescript.eslint/no-explicit-any": "off",
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/no-var-requires": 0,
+      "@typescript-eslint/no-mixed-spaces-and-tabs": 0
+    }
+  }
+}
