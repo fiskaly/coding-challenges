@@ -1,0 +1,15 @@
+customer_id,primary_name,secondary_name,mail,tss_id
+171c0f84-0b77-4cfc-96b1-368ddba2eb52,max,mustermann,max@musterman.at,60a77e92-eb07-43cb-b484-038a82dc9412
+86c0a875-e578-4b51-8013-767f39dfde25,justin,time,justin.time@gmail.com,1fb7191b-81a5-42d7-aac0-7125c4fcbf12
+86c0a875-e578-4b51-8013-767f39dfde25,justin,time,justin.time@gmail.com,d7a23f2c-bc86-424d-8da6-3ce58414fc10
+86c0a875-e578-4b51-8013-767f39dfde25,justin,time,justin.time@gmail.com,a9977a3c-c069-4903-8861-8940c49c6129
+301d23a7-d6b9-47f4-894c-1d7c8d1931be,justin,case,justin.case@gmail.com,7685323b-6337-4292-b098-80f4960d79de
+0b200b43-ace9-4856-b7f7-aa2d47c9338a,john,doe,john@doe.com,617fc3c0-7794-4e56-ac5b-a339e1d29ffe
+0b200b43-ace9-4856-b7f7-aa2d47c9338a,john,doe,john@doe.com,0c3beb0c-c184-42e3-8fb4-deda2ce6f25b
+e46dbc30-25fd-4025-9afe-913a8f3c0eaa,jane,doe,jane@doe.com,26dd4780-d3d8-4387-8292-55d2bb9acfcb
+e46dbc30-25fd-4025-9afe-913a8f3c0eaa,jane,doe,jane@doe.com,483a85e9-d313-46e7-b28f-d7f887a0c720
+e46dbc30-25fd-4025-9afe-913a8f3c0eaa,jane,doe,jane@doe.com,6eaa3a19-789a-46d7-a12a-96a154dd1ce0
+e46dbc30-25fd-4025-9afe-913a8f3c0eaa,jane,doe,jane@doe.com,366d3f59-8001-4bb7-b7c2-20876442dd18
+e46dbc30-25fd-4025-9afe-913a8f3c0eaa,jane,doe,jane@doe.com,ac6bf0f3-2bca-4a26-8a68-60b5503cfdde
+e46dbc30-25fd-4025-9afe-913a8f3c0eaa,jane,doe,jane@doe.com,6d76b0ef-b9ad-4ff2-9a23-7cb195f94d02
+e46dbc30-25fd-4025-9afe-913a8f3c0eaa,jane,doe,jane@doe.com,d4140946-f80b-48ea-88c9-1fbdb630720c
