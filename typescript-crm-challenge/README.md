@@ -4,7 +4,7 @@ Welcome challenger!
 When you see this, you have successfully passed the first interview at fiskaly. Now 
 comes the time to prove yourselves. We have the following challenge prepared for you, 
 containing elements from frontend development, backend development as well as database
-handling (don't worry, it's just a query ;) ). Now let's jump right into it! 
+handling. Now let's jump right into it! 
 
 ### Prerequisites:
 - docker
