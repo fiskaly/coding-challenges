@@ -5,8 +5,7 @@ ENV NODE_ENV=production
 WORKDIR /app
 COPY . /app/
 RUN npm install --save-dev
-RUN npm run build
 
 EXPOSE 3001/tcp
 
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "dev"]

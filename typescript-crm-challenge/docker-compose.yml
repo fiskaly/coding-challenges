@@ -16,7 +16,7 @@ services:
     build: ./backend
     ports:
       - '3001:3001'
-    command: npm run start
+    command: npm run dev
     environment:
       - HOST=0.0.0.0
       - PORT=3001
