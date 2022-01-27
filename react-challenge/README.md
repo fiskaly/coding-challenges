@@ -1,4 +1,4 @@
-# Web Challenge
+# React Challenge
 
 Welcome challenger!
 This challenge is here to see your React skills.
