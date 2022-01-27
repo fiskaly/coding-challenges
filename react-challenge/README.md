@@ -15,6 +15,7 @@ Basically a [Hex editor](https://en.wikipedia.org/wiki/Hex_editor) without the a
 - The component should be viewable with multiple variations/examples on storybook.
 
 Optional features:
+- Create a wrapper component that can load binary files (e.g. the example binary files in this folder)
 - It would be nice to be able to select one part of the hex viewer and automatically the other part gets highlighted as well.
 - The possibility to then copy the selected hex value or text (depending on what was selected) would be nice as well.
 - Add the ability to display a `Uint16Array`.
