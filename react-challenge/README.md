@@ -9,11 +9,10 @@ Create a **Hex viewer** component and display it in storybook.
 Basically a [Hex editor](https://en.wikipedia.org/wiki/Hex_editor) without the ability to change its content.
 
 - The component can retrieve either a `string` or `Uint8Array`.
-- The Hex viewer must be responsive and each part of the line must match (hex value must match with the text value on the other side).
-- The component must be able to display any sort of blob file and displays the bytes as hex on the left and if the
-  characters are printable (like numbers and letters) on the right.
-- Non-printable characters should be replaced with a special character and displayed on the right.
-- The component should be viewable with multiple variations on storybook.
+- The Hex viewer must be responsive and each part of the line must match (hex value must match with the text value line by line).
+- The component must be able to display the bytes as hex and readable text side by side.
+- Non-readable characters should be replaced with a special character.
+- The component should be viewable with multiple variations/examples on storybook.
 
 Optional features:
 - It would be nice to be able to select one part of the hex viewer and automatically the other part gets highlighted as well.
