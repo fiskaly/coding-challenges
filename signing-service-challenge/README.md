@@ -3,8 +3,8 @@
 ## Instructions
 
 Welcome challenger!  
-When you see this, you have successfully passed the first interview at fiskaly. Now 
-comes the time to prove yourselves. We have the following challenge prepared for you, 
+When you see this, you have successfully passed the first interview at fiskaly. Now
+comes the time to prove yourselves. We have the following challenge prepared for you,
 containing elements from frontend development, backend development as well as database
 handling. Now let's jump right into it!
 
@@ -13,8 +13,9 @@ handling. Now let's jump right into it!
 In order for you to not start from scratch with everything we provide you with:
 
 - Set up Go project
-- API utilities
-- Encoding / Decoding of different key types (ECC, RSA)
+- Basic API structure and functionality
+- Encoding / decoding of different key types (ECC, RSA)
+- Key generation (ECC, RSA)
 
 You can use these things as a foundation but you're also open to modify them how you see fit.
 
@@ -58,7 +59,7 @@ After the signature has been created, its value shall be increased by one (`sign
 For now we need to provide two operations to our customers:
 
 - `CreateSignatureDevice(id: string, algorithm: 'ECC' | 'RSA', [optional]: label): CreateSignatureDeviceResponse`
-- `SignTransaction(data: string): SignatureResponse`
+- `SignTransaction(deviceId: string, data: string): SignatureResponse`
 
 Think of how to expose these operations through a RESTful HTTP based API.
 
@@ -67,6 +68,11 @@ List / retrieval operations can optionally be implemented but aren't necessary b
 #### Technical Constraints & Considerations
 
 - The system will be used by many concurrent clients accessing the same resources.
-- The `signature counter` shall be strictly monotonically increasing and ideally without any gaps.
+- The `signature_counter` shall be strictly monotonically increasing and ideally without any gaps.
 - The system currently only supports `RSA` and `ECDSA` as signature algorithms. Try to design the signing mechanism in a way that allows easy extension to other algorithms without changing the core domain logic.
-- For now it is sufficient to use flat files (e.g. JSON) to persist data. Efficency is not a priority for this. We might want to scale out though, therefore try to think of how to allow easy swapping of your persistence logic to a database system such as PostgreSQL.
+- For now it is enough to store signature devices in memory. Efficiency is not a priority for this. We might want to scale out though, therefore try to think of how to allow easy swapping of your persistence logic to a database system such as PostgreSQL later on.
+- As we're in the area of compliance technology we need to make sure that our implementation is verifyably correct. Think of an appropriate approach to verify the correctness of the system.
+
+#### Credits
+
+This challenge is heavily influenced by the KassenSichV (Germany) as well as the RKSV (Austria).

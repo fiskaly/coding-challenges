@@ -12,17 +12,17 @@ type RSAKeyPair struct {
 	Private *rsa.PrivateKey
 }
 
-// RSAEncoder can encode an RSA key pair.
-type RSAEncoder struct{}
+// RSAMarshaler can encode and decode an RSA key pair.
+type RSAMarshaler struct{}
 
-// NewRSAEncoder is a factory for EccEncoder.
-func NewRSAEncoder() RSAEncoder {
-	return RSAEncoder{}
+// NewRSAMarshaler creates a new RSAMarshaler.
+func NewRSAMarshaler() RSAMarshaler {
+	return RSAMarshaler{}
 }
 
-// Encode takes an RSAKeyPair and encodes it to be written on disk.
+// Marshal takes an RSAKeyPair and encodes it to be written on disk.
 // It returns the public and the private key as a byte slice.
-func Encode(keyPair RSAKeyPair) ([]byte, []byte, error) {
+func (m *RSAMarshaler) Marshal(keyPair RSAKeyPair) ([]byte, []byte, error) {
 	privateKeyBytes := x509.MarshalPKCS1PrivateKey(keyPair.Private)
 	publicKeyBytes := x509.MarshalPKCS1PublicKey(keyPair.Public)
 
@@ -37,4 +37,18 @@ func Encode(keyPair RSAKeyPair) ([]byte, []byte, error) {
 	})
 
 	return encodePublic, encodedPrivate, nil
+}
+
+// Unmarshal takes an encoded RSA private key and transforms it into a rsa.PrivateKey.
+func (m *RSAMarshaler) Unmarshal(privateKeyBytes []byte) (*RSAKeyPair, error) {
+	block, _ := pem.Decode(privateKeyBytes)
+	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+
+	return &RSAKeyPair{
+		Private: privateKey,
+		Public:  &privateKey.PublicKey,
+	}, nil
 }
