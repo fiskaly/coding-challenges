@@ -65,14 +65,17 @@ Think of how to expose these operations through a RESTful HTTP based API.
 
 List / retrieval operations can optionally be implemented but aren't necessary by any means.
 
+#### QA / Testing
+
+As we're in the area of compliance technology we need to make sure that our implementation is verifiably correct. Think of an automatable way to assure the correctness (in this challenge: adherence to the specifications) of the system.
+
 #### Technical Constraints & Considerations
 
 - The system will be used by many concurrent clients accessing the same resources.
 - The `signature_counter` shall be strictly monotonically increasing and ideally without any gaps.
 - The system currently only supports `RSA` and `ECDSA` as signature algorithms. Try to design the signing mechanism in a way that allows easy extension to other algorithms without changing the core domain logic.
-- For now it is enough to store signature devices in memory. Efficiency is not a priority for this. We might want to scale out though, therefore try to think of how to allow easy swapping of your persistence logic to a database system such as PostgreSQL later on.
-- As we're in the area of compliance technology we need to make sure that our implementation is verifyably correct. Think of an appropriate approach to verify the correctness of the system.
+- For now it is enough to store signature devices in memory. Efficiency is not a priority for this. We might want to scale out though, therefore keep in mind that we might want to switch to a relational database at some point when designing your storage logic.
 
 #### Credits
 
-This challenge is heavily influenced by the KassenSichV (Germany) as well as the RKSV (Austria).
+This challenge is heavily influenced by the KassenSichV (Germany) as well as the RKSV (Austria) and our solutions for them.
