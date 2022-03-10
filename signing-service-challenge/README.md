@@ -2,11 +2,13 @@
 
 ## Instructions
 
-Welcome challenger!  
-When you see this, you have successfully passed the first interview at fiskaly. Now
-comes the time to prove yourself. We have the following challenge prepared for you,
-containing elements from frontend development, backend development as well as database
-handling. Now let's jump right into it!
+This challenge is part of the SWE interview process at fiskaly.
+
+If you see this challenge, you've passed the first round of interviews and are now at the second and last stage.
+
+We would ask you to prepare the challenge below to have a basis for discussion in the skill fit interview with two colleagues from the development department.
+
+`quality > quantity`
 
 ### Project Setup
 
@@ -14,8 +16,9 @@ In order for you to not start from scratch with everything we provide you with:
 
 - Go project containing setup
 - Basic API structure and functionality
-- Encoding / decoding of different key types (ECC, RSA)
+- Encoding / decoding of different key types (only needed when you want to serialize keys to a persistent storage)
 - Key generation (ECC, RSA)
+- Library to generate UUIDs included in `go.mod`
 
 You can use these things as a foundation, but you're also free to modify them as you see fit.
 
