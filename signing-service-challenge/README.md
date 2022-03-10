@@ -4,7 +4,7 @@
 
 Welcome challenger!  
 When you see this, you have successfully passed the first interview at fiskaly. Now
-comes the time to prove yourselves. We have the following challenge prepared for you,
+comes the time to prove yourself. We have the following challenge prepared for you,
 containing elements from frontend development, backend development as well as database
 handling. Now let's jump right into it!
 
@@ -12,12 +12,12 @@ handling. Now let's jump right into it!
 
 In order for you to not start from scratch with everything we provide you with:
 
-- Set up Go project
+- Go project containing setup
 - Basic API structure and functionality
 - Encoding / decoding of different key types (ECC, RSA)
 - Key generation (ECC, RSA)
 
-You can use these things as a foundation but you're also open to modify them how you see fit.
+You can use these things as a foundation, but you're also free to modify them as you see fit.
 
 ### Prerequisites & Tooling
 
@@ -29,11 +29,11 @@ The aim is to implement an API service that allows customers to create "signatur
 
 #### Domain Description
 
-Our signature service can manage multiple signature devices. Such a device is identified by an unique identifier (e.g. UUID). For now we can pretend there is only one user / organisation using the system (e.g. a dedicated node for them) and therefore need not to think about user management.
+The signature service can manage multiple signature devices. Such a device is identified by a unique identifier (e.g. UUID). For now you can pretend there is only one user / organisation using the system (e.g. a dedicated node for them) therefore you do not need to think about user management at all.
 
-When creating the signature device, the client of the API specifies the signature algorithm that the device will be using to sign transaction data. During the creation process, a new key pair (public key & private key) has to be generated and assigned to the device.
+When creating the signature device, the client of the API has to make a choice and specify the signature algorithm that the device will be using to sign transaction data. During the creation process, a new key pair (public key & private key) has to be generated and assigned to the device.
 
-The signature device should also have a `label` that can be used to display it in an UI and a `signature_counter` that tracks how many signatures have been performed. While the `label` is provided by the user, the `signature_counter` shall only be modified internally.
+The signature device should also have a `label` that can be used to display it in a UI and a `signature_counter` that tracks how many signatures have been performed with this device. While the `label` is provided by the user, the `signature_counter` shall only be modified internally.
 
 ##### Signature Creation
 
@@ -52,13 +52,13 @@ This special string will be signed (`Signer.sign(secured_data_to_be_signed)`) an
 }
 ```
 
-After the signature has been created, its value shall be increased by one (`signature_counter += 1`).
+After the signature has been created, the signature counters value shall be incremented (`signature_counter += 1`).
 
 #### API
 
 For now we need to provide two operations to our customers:
 
-- `CreateSignatureDevice(id: string, algorithm: 'ECC' | 'RSA', [optional]: label): CreateSignatureDeviceResponse`
+- `CreateSignatureDevice(id: string, algorithm: 'ECC' | 'RSA', [optional]: label: string): CreateSignatureDeviceResponse`
 - `SignTransaction(deviceId: string, data: string): SignatureResponse`
 
 Think of how to expose these operations through a RESTful HTTP based API.
