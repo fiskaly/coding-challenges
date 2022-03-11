@@ -8,7 +8,7 @@ If you see this challenge, you've passed the first round of interviews and are n
 
 We would like you to complete the challenge below. The two colleagues from the development department will then discuss your solution with you in the skill fit interview.
 
-The `quality` of code your write is more important to us than the `quantity`.
+The `quality` of your code is more important to us than the `quantity`.
 
 ### Project Setup
 
