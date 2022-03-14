@@ -6,9 +6,9 @@ This challenge is part of the software engineering interview process at fiskaly.
 
 If you see this challenge, you've passed the first round of interviews and are now at the second and last stage.
 
-We would like you to complete the challenge below. The two colleagues from the development department will then discuss your solution with you in the skill fit interview.
+We would like you to attempt the challenge below. You will then be able to discuss your solution in the skill-fit interview with two of our colleagues from the development department.
 
-The `quality` of your code is more important to us than the `quantity`.
+The quality of your code is more important to us than the quantity.
 
 ### Project Setup
 
@@ -70,7 +70,7 @@ Think of how to expose these operations through a RESTful HTTP based API.
 
 #### QA / Testing
 
-As we are in the business of compliance technology, we need to make sure that our implementation is verifiably compliant. Think of an automatable way to assure the correctness (in this challenge: adherence to the specifications) of the system.
+As we are in the business of compliance technology, we need to make sure that our implementation is verifiably correct. Think of an automatable way to assure the correctness (in this challenge: adherence to the specifications) of the system.
 
 #### Technical Constraints & Considerations
 
@@ -81,4 +81,4 @@ As we are in the business of compliance technology, we need to make sure that ou
 
 #### Credits
 
-This challenge is heavily influenced by the [`KassenSichV`](https://kassensichv.com/) (Germany) as well as the [`RKSV`](https://www.wko.at/branchen/information-consulting/unternehmensberatung-buchhaltung-informationstechnologie/it-dienstleistung/BGBLA-2015-II-410-EN.PDF) (Austria) and our [solutions](https://developer.fiskaly.com/api) for them.
+This challenge is heavily influenced by the `KassenSichV` (Germany) as well as the `RKSV` (Austria) and our solutions for them.
