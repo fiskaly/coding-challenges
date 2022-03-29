@@ -16,7 +16,7 @@ In order for you to not start from scratch with everything we provide you with:
 - API utilities
 - Encoding / Decoding of different key types (ECC, RSA)
 
-You can use these things as a foundation but you're also open to modify them how you see fit.
+You can use these things as a foundation, but you're also open to modify them how you see fit.
 
 ### Prerequisites & Tooling
 
@@ -74,6 +74,11 @@ Think of how to expose these operations through a RESTful HTTP based API.
 
 List / retrieval operations can optionally be implemented but aren't necessary by any means.
 
+#### QA / Testing
+
+As we're in the area of compliance technology we need to make sure that our implementation is verifiable correct. 
+Think of an automatable way to assure the correctness (in this challenge: adherence to the specifications) of the system.
+
 #### Technical Constraints & Considerations
 
 - The system will be used by many concurrent clients accessing the same resources.
@@ -83,3 +88,7 @@ in a way that allows easy extension to other algorithms without changing the cor
 - For now it is sufficient to use flat files (e.g. JSON) to persist data. Efficiency is not a priority for this. We 
 might want to scale out though, therefore try to think of how to allow easy swapping of your persistence logic to a 
 database system such as PostgreSQL.
+
+#### Credits
+
+This challenge is heavily influenced by the KassenSichV (Germany) as well as the RKSV (Austria) and our solutions for them.
