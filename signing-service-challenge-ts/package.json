@@ -1,0 +1,27 @@
+{
+  "name": "signing-service-ts",
+  "version": "1.0.0",
+  "description": "fiskaly coding challenge to build a signing service",
+  "main": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -p tsconfig.json",
+    "dev": "ts-node-dev --respawn src/index.ts",
+    "start": "node --es-module-specifier-resolution=node build/server.js"
+  },
+  "author": "Stefan Kohlbacher",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.2",
+    "express": "^4.17.3",
+    "http": "^0.0.1-security",
+    "http-errors": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/node": "^17.0.21",
+    "ts-node": "^10.7.0",
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^4.6.2"
+  }
+}
