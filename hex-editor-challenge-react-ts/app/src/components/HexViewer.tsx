@@ -1,17 +1,21 @@
 import React from 'react';
+import { useState } from 'react';
+import "./HexViewer.css";
+import HexView from "./HexView";
+import TextView from "./TextView";
 
 interface HexViewerProps {
-  data: string | Uint8Array;
+  data: string[];
 }
 
 export default function HexViewer(props: HexViewerProps) {
-  /*
-   * This component is the main challenge. You can be wild here and change
-   * everything!
-   */
+  const [hovered, setHovered] = useState<number>(-1);
+  const [active, setActive] = useState<number>(-1);
+
   return (
-    <pre style={{ overflowWrap: 'break-word', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
-      Here comes the HexViewer<br />{ props.data }
-    </pre>
+    <div className="hex-viewer" data-testid="viewer">
+      <HexView data={props.data} hoverIndex={hovered} hoverIndexChange={setHovered} activeIndex={active} activeIndexChange={setActive} />
+      <TextView data={props.data} hoverIndex={hovered} hoverIndexChange={setHovered} activeIndex={active} activeIndexChange={setActive} />
+    </div>
   );
 }

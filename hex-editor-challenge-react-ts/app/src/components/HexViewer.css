@@ -1,0 +1,61 @@
+.hex-viewer {
+    /* Used for auto-width columns' boundaries */
+    --grid-item--width: 2em;
+    --highlight-color: rebeccapurple;
+    --hover-border-color: rgba(102, 51, 153, .84);
+
+    display: grid;
+    gap: 2em;
+    grid-template-columns: 2fr 1fr;
+    grid-auto-flow: column;
+    font-family: monospace;
+}
+
+.hex-viewer *::-moz-selection {
+    color: currentColor;
+    background: transparent;
+}
+
+.hex-viewer *::selection {
+    color: currentColor;
+    background: transparent;
+}
+
+.hex-view,
+.text-view {
+    display: grid;
+    justify-items: center;
+    outline: none;
+}
+
+.hex-view {
+    grid-template-columns: repeat(auto-fill, minmax(var(--grid-item--width), 1fr));
+}
+
+.text-view {
+    grid-template-columns: repeat(auto-fill, minmax(calc(var(--grid-item--width)/2), 1fr));
+}
+
+.hex-view>span,
+.text-view>span {
+    display: block;
+    min-width: calc(var(--grid-item--width) * 0.6);
+    text-align: center;
+    cursor: pointer;
+    border: 1px dotted transparent;
+}
+
+.hex-view>span.hover,
+.text-view>span.hover {
+    border-color: var(--hover-border-color);
+}
+
+.hex-view>span.active,
+.text-view>span.active {
+    color: white;
+    background: var(--highlight-color);
+}
+
+.faded {
+    opacity: .3;
+}
