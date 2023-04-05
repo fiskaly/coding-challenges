@@ -42,9 +42,9 @@ The `signature device` should also have a `label` that can be used to display it
 
 For the signature creation, the client will have to provide `data_to_be_signed` through the API. In order to increase the security of the system, we will extend this raw data with the current `signature_counter` and the `last_signature`.
 
-The resulting string should follow this format: `<signature_counter>_<data_to_be_signed>_<last_signature_base64_encoded>`
+The resulting string (`secured_data_to_be_signed`) should follow this format: `<signature_counter>_<data_to_be_signed>_<last_signature_base64_encoded>`
 
-In the base case there is no `last_signature` (= `signature_counter == 0`). Use the `base64` encoded device ID (`last_signature = base64(device.id)`) instead of the `last_signature`.
+In the base case there is no `last_signature` (= `signature_counter == 0`). Use the `base64`-encoded device ID (`last_signature = base64(device.id)`) instead of the `last_signature`.
 
 This special string will be signed (`Signer.sign(secured_data_to_be_signed)`) and the resulting signature (`base64` encoded) will be returned to the client. The signature response could look like this:
 
@@ -55,7 +55,7 @@ This special string will be signed (`Signer.sign(secured_data_to_be_signed)`) an
 }
 ```
 
-After the signature has been created, the signature counters value has to be incremented (`signature_counter += 1`).
+After the signature has been created, the signature counter's value has to be incremented (`signature_counter += 1`).
 
 #### API
 
@@ -81,4 +81,4 @@ As we are in the business of compliance technology, we need to make sure that ou
 
 #### Credits
 
-This challenge is heavily influenced by the `KassenSichV` (Germany) as well as the `RKSV` (Austria) and our solutions for them.
+This challenge is heavily influenced by the regulations for `KassenSichV` (Germany) as well as the `RKSV` (Austria) and our solutions for them.
