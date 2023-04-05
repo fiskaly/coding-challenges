@@ -24,7 +24,7 @@ You can use these things as a foundation, but you're also free to modify them as
 
 ### Prerequisites & Tooling
 
-- Golang (v1.16+)
+- Golang (v1.20+)
 
 ### The Challenge
 
