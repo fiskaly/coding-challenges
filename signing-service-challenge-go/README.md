@@ -59,14 +59,14 @@ After the signature has been created, the signature counter's value has to be in
 
 #### API
 
-For now we need to provide two operations to our customers:
+For now we need to provide two main operations to our customers:
 
 - `CreateSignatureDevice(id: string, algorithm: 'ECC' | 'RSA', [optional]: label: string): CreateSignatureDeviceResponse`
 - `SignTransaction(deviceId: string, data: string): SignatureResponse`
 
-Think of how to expose these operations through a RESTful HTTP based API.
+Think of how to expose these operations through a RESTful HTTP-based API.
 
-`List / retrieval operations` can optionally be implemented but are not required.
+In addition, `list / retrieval operations` for the resources generated in the previous operations should be made available to the customers.
 
 #### QA / Testing
 
