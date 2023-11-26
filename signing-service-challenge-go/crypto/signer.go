@@ -1,6 +1,11 @@
 package crypto
 
 import (
+	"crypto"
+	"crypto/ecdsa"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha256"
 	"errors"
 )
 
@@ -30,12 +35,56 @@ type RSASigner struct {
 }
 
 func (signer *RSASigner) Sign(dataToBeSigned []byte) ([]byte, error) {
-	return nil, errors.New("not implemented")
+	// TODO: Key pair shall be provided to signer in constructor
+	keyPair, err := generateRSAKeyPair()
+	if err != nil {
+		return nil, err
+	}
+
+	hashed := sha256.Sum256(dataToBeSigned)
+	sig, err := rsa.SignPKCS1v15(nil, keyPair.Private, crypto.SHA256, hashed[:])
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: Extract into a Verifier interface
+	if err = rsa.VerifyPKCS1v15(keyPair.Public, crypto.SHA256, hashed[:], sig); err != nil {
+		return nil, err
+	}
+
+	return sig, nil
+}
+
+func generateRSAKeyPair() (*RSAKeyPair, error) {
+	g := &RSAGenerator{}
+	return g.Generate()
 }
 
 type ECCSigner struct {
 }
 
 func (signer *ECCSigner) Sign(dataToBeSigned []byte) ([]byte, error) {
-	return nil, errors.New("not implemented")
+	// TODO: Key pair shall be provided to signer in constructor
+	keyPair, err := generateECCKeyPair()
+	if err != nil {
+		return nil, err
+	}
+
+	hashed := sha256.Sum256(dataToBeSigned)
+	sig, err := ecdsa.SignASN1(rand.Reader, keyPair.Private, hashed[:])
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: Extract into a Verifier interface
+	if valid := ecdsa.VerifyASN1(keyPair.Public, hashed[:], sig); !valid {
+		return nil, errors.New("invalid ECC signature")
+	}
+
+	return sig, nil
+}
+
+func generateECCKeyPair() (*ECCKeyPair, error) {
+	g := &ECCGenerator{}
+	return g.Generate()
 }
