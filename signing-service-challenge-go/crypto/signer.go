@@ -30,7 +30,6 @@ type Signer interface {
 	Sign(dataToBeSigned []byte) ([]byte, error)
 }
 
-// TODO: implement RSA and ECDSA signing ...
 type RSASigner struct {
 }
 
@@ -55,6 +54,7 @@ func (signer *RSASigner) Sign(dataToBeSigned []byte) ([]byte, error) {
 	return sig, nil
 }
 
+// TODO: inject generator in constructor
 func generateRSAKeyPair() (*RSAKeyPair, error) {
 	g := &RSAGenerator{}
 	return g.Generate()

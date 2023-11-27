@@ -11,7 +11,7 @@ import (
 )
 
 func TestSignWithRSA(t *testing.T) {
-	id := uuid.New()
+	id := uuid.NewString()
 	device, err := domain.NewSignatureDevice(id, nil, crypto.AlgorithmECC)
 	if err != nil {
 		t.Fatal("failed to create signature device")
