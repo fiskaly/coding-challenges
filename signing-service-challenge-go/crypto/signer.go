@@ -9,33 +9,36 @@ import (
 	"errors"
 )
 
-const (
-	AlgorithmRSA = "RSA"
-	AlgorithmECC = "ECC"
-)
-
-func NewSigner(algorithm string) (Signer, error) {
-	switch algorithm {
-	case AlgorithmRSA:
-		return &RSASigner{}, nil
-	case AlgorithmECC:
-		return &ECCSigner{}, nil
-	default:
-		return nil, errors.New("invalid algorithm")
-	}
-}
-
 // Signer defines a contract for different types of signing implementations.
 type Signer interface {
 	Sign(dataToBeSigned []byte) ([]byte, error)
 }
 
 type RSASigner struct {
+	EncodedPrivateKey []byte
+	Marshaller        *RSAMarshaler
+}
+
+func NewRSASigner() (Signer, error) {
+	g := RSAGenerator{}
+	keyPair, err := g.Generate()
+	if err != nil {
+		return nil, err
+	}
+	marshaller := &RSAMarshaler{}
+	_, encodedPrivate, err := marshaller.Marshal(*keyPair)
+	if err != nil {
+		return nil, err
+	}
+
+	return &RSASigner{
+		EncodedPrivateKey: encodedPrivate,
+		Marshaller:        marshaller,
+	}, nil
 }
 
 func (signer *RSASigner) Sign(dataToBeSigned []byte) ([]byte, error) {
-	// TODO: Key pair shall be provided to signer in constructor
-	keyPair, err := generateRSAKeyPair()
+	keyPair, err := signer.Marshaller.Unmarshal(signer.EncodedPrivateKey)
 	if err != nil {
 		return nil, err
 	}
@@ -54,18 +57,31 @@ func (signer *RSASigner) Sign(dataToBeSigned []byte) ([]byte, error) {
 	return sig, nil
 }
 
-// TODO: inject generator in constructor
-func generateRSAKeyPair() (*RSAKeyPair, error) {
-	g := &RSAGenerator{}
-	return g.Generate()
+type ECCSigner struct {
+	EncodedPrivateKey []byte
+	Marshaller        *ECCMarshaler
 }
 
-type ECCSigner struct {
+func NewECCSigner() (Signer, error) {
+	g := ECCGenerator{}
+	keyPair, err := g.Generate()
+	if err != nil {
+		return nil, err
+	}
+	marshaller := &ECCMarshaler{}
+	_, encodedPrivate, err := marshaller.Encode(*keyPair)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ECCSigner{
+		EncodedPrivateKey: encodedPrivate,
+		Marshaller:        marshaller,
+	}, nil
 }
 
 func (signer *ECCSigner) Sign(dataToBeSigned []byte) ([]byte, error) {
-	// TODO: Key pair shall be provided to signer in constructor
-	keyPair, err := generateECCKeyPair()
+	keyPair, err := signer.Marshaller.Decode(signer.EncodedPrivateKey)
 	if err != nil {
 		return nil, err
 	}
@@ -82,9 +98,4 @@ func (signer *ECCSigner) Sign(dataToBeSigned []byte) ([]byte, error) {
 	}
 
 	return sig, nil
-}
-
-func generateECCKeyPair() (*ECCKeyPair, error) {
-	g := &ECCGenerator{}
-	return g.Generate()
 }
