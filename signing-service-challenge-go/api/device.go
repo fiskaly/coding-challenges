@@ -1,8 +1,6 @@
 package api
 
 import (
-	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -15,10 +13,10 @@ type CreateSignatureDeviceResponse struct {
 }
 
 type ListSignatureDevicesResponse struct {
-	Devices []SignatureDevice `json:"signature_devices"`
+	Devices []SignatureDeviceDTO `json:"signature_devices"`
 }
 
-type SignatureDevice struct {
+type SignatureDeviceDTO struct {
 	Id        string `json:"id"`
 	Label     string `json:"label"`
 	Algorithm string `json:"algorithm"`
@@ -35,20 +33,12 @@ func (s *Server) CreateSignatureDevice(response http.ResponseWriter, request *ht
 	id := request.Header.Get("id")
 	label := request.Header.Get("label")
 	algorithm := request.Header.Get("algorithm")
-	device, err := createSignatureDevice(id, label, algorithm)
+	device, err := s.signingService.CreateSignatureDevice(id, label, algorithm)
 	if err != nil {
 		WriteErrorResponse(response, http.StatusInternalServerError, []string{err.Error()})
 	} else {
 		WriteAPIResponse(response, http.StatusCreated, CreateSignatureDeviceResponse{Id: device.Id})
 	}
-}
-
-func createSignatureDevice(id string, label string, algorithm string) (*domain.SignatureDevice, error) {
-	return &domain.SignatureDevice{
-		Id:    id,
-		Label: &label,
-	}, nil
-	// return domain.CreateSignatureDevice(id, &label, algorithm)
 }
 
 // TODO: Add pagination and filtering
@@ -60,37 +50,20 @@ func (s *Server) ListSignatureDevices(response http.ResponseWriter, request *htt
 		return
 	}
 
-	devices, err := listSignatureDevices()
+	devices, err := s.signingService.ListSignatureDevices()
 	if err != nil {
 		WriteErrorResponse(response, http.StatusInternalServerError, []string{err.Error()})
 	} else {
 		WriteAPIResponse(response, http.StatusCreated, ListSignatureDevicesResponse{
-			Devices: util.Map(devices, func(device *domain.SignatureDevice) SignatureDevice {
-				return SignatureDevice{
+			Devices: util.Map(devices, func(device domain.SignatureDevice) SignatureDeviceDTO {
+				return SignatureDeviceDTO{
 					Id:        device.Id,
-					Label:     *device.Label,
+					Label:     device.Label,
 					Algorithm: device.Algorithm,
 				}
 			}),
 		})
 	}
-}
-
-func listSignatureDevices() ([]*domain.SignatureDevice, error) {
-	label1 := "Device 1"
-	label2 := "Device 2"
-	return []*domain.SignatureDevice{
-		{
-			Id:        "1",
-			Label:     &label1,
-			Algorithm: "RSA",
-		},
-		{
-			Id:        "2",
-			Label:     &label2,
-			Algorithm: "ECC",
-		},
-	}, nil
 }
 
 // TODO: Add pagination and filtering
@@ -103,13 +76,18 @@ func (s *Server) GetSignatureDevice(response http.ResponseWriter, request *http.
 	}
 
 	id := fetchIdFromPath(request)
-	device, err := getSignatureDevice(id)
+	if id == "" {
+		WriteErrorResponse(response, http.StatusBadRequest, []string{"unspecified device id"})
+		return
+	}
+
+	device, err := s.signingService.GetSignatureDeviceById(id)
 	if err != nil {
 		WriteErrorResponse(response, http.StatusInternalServerError, []string{err.Error()})
 	} else {
-		WriteAPIResponse(response, http.StatusOK, SignatureDevice{
+		WriteAPIResponse(response, http.StatusOK, SignatureDeviceDTO{
 			Id:        device.Id,
-			Label:     *device.Label,
+			Label:     device.Label,
 			Algorithm: device.Algorithm,
 		})
 	}
@@ -119,17 +97,4 @@ func fetchIdFromPath(request *http.Request) string {
 	parts := strings.Split(request.URL.Path, "/")
 	id := parts[len(parts)-1]
 	return id
-}
-
-func getSignatureDevice(id string) (*domain.SignatureDevice, error) {
-	if id == "" {
-		return nil, errors.New("unspecified device id")
-	}
-
-	label := fmt.Sprintf("Device %s", id)
-	return &domain.SignatureDevice{
-		Id:        id,
-		Label:     &label,
-		Algorithm: "RSA",
-	}, nil
 }

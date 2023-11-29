@@ -4,6 +4,8 @@ import (
 	"log"
 
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/api"
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/domain"
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/persistence"
 )
 
 const (
@@ -12,7 +14,10 @@ const (
 )
 
 func main() {
-	server := api.NewServer(ListenAddress)
+	repo := persistence.NewInMemoryDeviceRepository()
+	deviceService := domain.NewSigningService(repo)
+
+	server := api.NewServer(ListenAddress, deviceService)
 
 	if err := server.Run(); err != nil {
 		log.Fatal("Could not start server on ", ListenAddress)

@@ -15,8 +15,8 @@ type Signer interface {
 }
 
 type RSASigner struct {
-	EncodedPrivateKey []byte
-	Marshaller        *RSAMarshaler
+	encodedPrivateKey []byte
+	marshaller        *RSAMarshaler
 }
 
 func NewRSASigner() (Signer, error) {
@@ -25,6 +25,7 @@ func NewRSASigner() (Signer, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	marshaller := &RSAMarshaler{}
 	_, encodedPrivate, err := marshaller.Marshal(*keyPair)
 	if err != nil {
@@ -32,13 +33,13 @@ func NewRSASigner() (Signer, error) {
 	}
 
 	return &RSASigner{
-		EncodedPrivateKey: encodedPrivate,
-		Marshaller:        marshaller,
+		encodedPrivateKey: encodedPrivate,
+		marshaller:        marshaller,
 	}, nil
 }
 
 func (signer *RSASigner) Sign(dataToBeSigned []byte) ([]byte, error) {
-	keyPair, err := signer.Marshaller.Unmarshal(signer.EncodedPrivateKey)
+	keyPair, err := signer.marshaller.Unmarshal(signer.encodedPrivateKey)
 	if err != nil {
 		return nil, err
 	}
@@ -58,8 +59,8 @@ func (signer *RSASigner) Sign(dataToBeSigned []byte) ([]byte, error) {
 }
 
 type ECCSigner struct {
-	EncodedPrivateKey []byte
-	Marshaller        *ECCMarshaler
+	encodedPrivateKey []byte
+	marshaller        *ECCMarshaler
 }
 
 func NewECCSigner() (Signer, error) {
@@ -68,6 +69,7 @@ func NewECCSigner() (Signer, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	marshaller := &ECCMarshaler{}
 	_, encodedPrivate, err := marshaller.Encode(*keyPair)
 	if err != nil {
@@ -75,13 +77,13 @@ func NewECCSigner() (Signer, error) {
 	}
 
 	return &ECCSigner{
-		EncodedPrivateKey: encodedPrivate,
-		Marshaller:        marshaller,
+		encodedPrivateKey: encodedPrivate,
+		marshaller:        marshaller,
 	}, nil
 }
 
 func (signer *ECCSigner) Sign(dataToBeSigned []byte) ([]byte, error) {
-	keyPair, err := signer.Marshaller.Decode(signer.EncodedPrivateKey)
+	keyPair, err := signer.marshaller.Decode(signer.encodedPrivateKey)
 	if err != nil {
 		return nil, err
 	}
