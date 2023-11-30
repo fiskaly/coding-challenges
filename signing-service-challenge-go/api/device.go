@@ -149,6 +149,7 @@ func (s *Server) SignTransaction(response http.ResponseWriter, request *http.Req
 	if err != nil {
 		// handle error
 		WriteErrorResponse(response, http.StatusInternalServerError, []string{err.Error()})
+		return
 	}
 
 	WriteAPIResponse(response, http.StatusOK, SignatureResponse{
