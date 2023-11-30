@@ -82,3 +82,19 @@ As we are in the business of compliance technology, we need to make sure that ou
 #### Credits
 
 This challenge is heavily influenced by the regulations for `KassenSichV` (Germany) as well as the `RKSV` (Austria) and our solutions for them.
+
+## Implementation
+
+### Endpoints
+
+- POST /api/v0/device - `Create device` 
+- GET /api/v0/device/ - `List devices`
+- GET /api/v0/device/:id - `Get device by ID`
+- POST /api/v0/device/:id/sign - `Sign`
+
+### Architecture
+#### Layers
+- API - *handle data serialization/deserialization*
+- Domain - *validate and process data*
+- Persistence - *store data*
+
