@@ -1,7 +1,6 @@
 package persistence
 
 import (
-	"fmt"
 	"slices"
 	"sync"
 
@@ -18,17 +17,20 @@ func NewInMemoryDeviceRepository() domain.SignatureDeviceRepository {
 }
 
 func (repo *signatureDeviceRepository) StoreSignatureDevice(device *domain.SignatureDevice) error {
+	// TODO: deep clone, checkout "github.com/barkimedes/go-deepcopy"
 	repo.m.Lock()
 	defer repo.m.Unlock()
 
-	if slices.ContainsFunc(repo.devices, func(d domain.SignatureDevice) bool {
+	// Update if exists
+	i := slices.IndexFunc(repo.devices, func(d domain.SignatureDevice) bool {
 		return d.Id == device.Id
-	}) {
-		return fmt.Errorf("device with id %s already exists", device.Id)
-	}
+	})
 
-	// TODO: deep clone, checkout "github.com/barkimedes/go-deepcopy"
-	repo.devices = append(repo.devices, *device)
+	if i == -1 {
+		repo.devices = append(repo.devices, *device)
+	} else {
+		repo.devices[i] = *device
+	}
 
 	return nil
 }

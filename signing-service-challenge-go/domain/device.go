@@ -1,8 +1,8 @@
 package domain
 
 import (
-	"encoding/base64"
 	"fmt"
+	"sync"
 
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/crypto"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/util"
@@ -15,6 +15,7 @@ type SignatureDevice struct {
 	signer           crypto.Signer
 	signatureCounter uint
 	lastSignature    string
+	mutex            sync.Mutex
 }
 
 type SignDataResult struct {
@@ -28,7 +29,7 @@ func NewSignatureDevice(
 	algorithm string,
 	signer crypto.Signer,
 ) *SignatureDevice {
-	lastSignature := base64.StdEncoding.EncodeToString([]byte(id))
+	lastSignature := util.EncodeToBase64String([]byte(id))
 	return &SignatureDevice{
 		Id:               id,
 		Label:            label,
@@ -40,6 +41,9 @@ func NewSignatureDevice(
 }
 
 func (device *SignatureDevice) Sign(dataToBeSigned []byte) (*SignDataResult, error) {
+	device.mutex.Lock()
+	defer device.mutex.Unlock()
+
 	securedData := device.secureData(dataToBeSigned)
 
 	signature, err := device.signer.Sign(securedData)
@@ -47,7 +51,6 @@ func (device *SignatureDevice) Sign(dataToBeSigned []byte) (*SignDataResult, err
 		return nil, err
 	}
 
-	// TODO: make thread safe
 	device.signatureCounter += 1
 	device.lastSignature = util.EncodeToBase64String(signature)
 

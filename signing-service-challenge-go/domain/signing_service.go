@@ -56,10 +56,6 @@ func (service *SigningService) createSignatureDevice(id string, label string, al
 	}
 
 	device := NewSignatureDevice(id, label, algorithm, signer)
-	err = service.deviceRepo.StoreSignatureDevice(device)
-	if err != nil {
-		return nil, err
-	}
 
 	return device, nil
 }
@@ -95,6 +91,11 @@ func (service *SigningService) SignTransaction(deviceId string, data []byte) (*S
 	}
 
 	result, err := device.Sign(data)
+	if err != nil {
+		return nil, err
+	}
+
+	service.deviceRepo.StoreSignatureDevice(device)
 	if err != nil {
 		return nil, err
 	}
