@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"strings"
@@ -37,27 +36,32 @@ func (service *SigningService) CreateSignatureDevice(id string, label string, al
 		return nil, fmt.Errorf("device with id %s already exists", id)
 	}
 
+	device, err := service.createSignatureDevice(id, label, algorithm)
+	if err != nil {
+		return nil, err
+	}
+
+	err = repo.StoreSignatureDevice(device)
+	if err != nil {
+		return nil, err
+	}
+
+	return device, nil
+}
+
+func (service *SigningService) createSignatureDevice(id string, label string, algorithm string) (*SignatureDevice, error) {
 	signer, err := createSigner(algorithm)
 	if err != nil {
 		return nil, err
 	}
 
-	lastSignature := base64.StdEncoding.EncodeToString([]byte(id))
-	device := SignatureDevice{
-		Id:               id,
-		Label:            label,
-		Algorithm:        algorithm,
-		signer:           signer,
-		signatureCounter: 0,
-		lastSignature:    lastSignature,
-	}
-
-	err = repo.StoreSignatureDevice(&device)
+	device := NewSignatureDevice(id, label, algorithm, signer)
+	err = service.deviceRepo.StoreSignatureDevice(device)
 	if err != nil {
 		return nil, err
 	}
 
-	return &device, nil
+	return device, nil
 }
 
 func createSigner(algorithm string) (crypto.Signer, error) {
