@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/crypto"
 	"github.com/google/uuid"
@@ -16,6 +17,8 @@ const (
 
 type SigningService struct {
 	deviceRepo SignatureDeviceRepository
+	signLock   sync.Mutex
+	createLock sync.Mutex
 }
 
 func NewSigningService(deviceRepo SignatureDeviceRepository) *SigningService {
@@ -29,7 +32,10 @@ func (service *SigningService) CreateSignatureDevice(id string, label string, al
 		return nil, errors.New("invalid id")
 	}
 
-	// TODO: Revise locking
+	// If we do not lock here then multiple devices with the same id might be created
+	service.createLock.Lock()
+	defer service.createLock.Unlock()
+
 	repo := service.deviceRepo
 	existing := repo.GetSignatureDeviceById(id)
 	if existing != nil {
@@ -85,6 +91,13 @@ func (service *SigningService) GetSignatureDeviceById(id string) (*SignatureDevi
 }
 
 func (service *SigningService) SignTransaction(deviceId string, data []byte) (*SignDataResult, error) {
+	// TODO: Improve performance
+	// Locking indiscriminately on each sign is bad for performance because is locks out all devices from signing
+	// One solution would be to keep track of active devices, counting each instance by id (map[string]uint)
+	// For each device we would create a mutex to control signing
+	service.signLock.Lock()
+	defer service.signLock.Unlock()
+
 	device := service.deviceRepo.GetSignatureDeviceById(deviceId)
 	if device == nil {
 		return nil, ErrorDeviceNotFound(deviceId)
