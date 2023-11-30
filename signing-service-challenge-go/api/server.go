@@ -37,8 +37,10 @@ func (s *Server) Run() error {
 
 	mux.Handle("/api/v0/health", http.HandlerFunc(s.Health))
 	mux.Handle("/api/v0/device", http.HandlerFunc(s.CreateSignatureDevice))
-	mux.Handle("/api/v0/devices", http.HandlerFunc(s.ListSignatureDevices))
-	mux.Handle("/api/v0/device/", http.HandlerFunc(s.GetSignatureDevice))
+	mux.Handle("/api/v0/device/", http.HandlerFunc(s.DeviceActions))
+	// mux.Handle("/api/v0/devices", http.HandlerFunc(s.ListSignatureDevices))
+	// mux.Handle("/api/v0/device/", http.HandlerFunc(s.GetSignatureDevice))
+	// mux.Handle("/api/v0/device/", http.HandlerFunc(s.SignTransaction))
 
 	return http.ListenAndServe(s.listenAddress, mux)
 }
@@ -64,6 +66,10 @@ func WriteErrorResponse(w http.ResponseWriter, code int, errors []string) {
 	}
 
 	w.Write(bytes)
+}
+
+func WriteInvalidEndpointResponse(w http.ResponseWriter) {
+	WriteErrorResponse(w, http.StatusNotFound, []string{"Invalid Endpoint"})
 }
 
 // WriteAPIResponse takes an HTTP status code and a generic data struct

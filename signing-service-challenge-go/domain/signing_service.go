@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/crypto"
 	"github.com/google/uuid"
@@ -60,7 +61,7 @@ func (service *SigningService) CreateSignatureDevice(id string, label string, al
 }
 
 func createSigner(algorithm string) (crypto.Signer, error) {
-	switch algorithm {
+	switch strings.ToUpper(algorithm) {
 	case AlgorithmRSA:
 		return crypto.NewRSASigner()
 	case AlgorithmECC:
@@ -77,8 +78,22 @@ func (service *SigningService) ListSignatureDevices() ([]SignatureDevice, error)
 func (service *SigningService) GetSignatureDeviceById(id string) (*SignatureDevice, error) {
 	device := service.deviceRepo.GetSignatureDeviceById(id)
 	if device == nil {
-		return nil, fmt.Errorf("device with id %s does not exist", id)
+		return nil, ErrorDeviceNotFound(id)
 	}
 
 	return device, nil
+}
+
+func (service *SigningService) SignTransaction(deviceId string, data []byte) (*SignDataResult, error) {
+	device := service.deviceRepo.GetSignatureDeviceById(deviceId)
+	if device == nil {
+		return nil, ErrorDeviceNotFound(deviceId)
+	}
+
+	result, err := device.Sign(data)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

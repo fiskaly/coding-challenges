@@ -1,10 +1,10 @@
 package domain
 
 import (
-	"encoding/base64"
 	"fmt"
 
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/crypto"
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/util"
 )
 
 type SignatureDevice struct {
@@ -31,7 +31,7 @@ func (device *SignatureDevice) Sign(dataToBeSigned []byte) (*SignDataResult, err
 
 	// TODO: make thread safe
 	device.signatureCounter += 1
-	device.lastSignature = base64.StdEncoding.EncodeToString(signature)
+	device.lastSignature = util.EncodeToBase64String(signature)
 
 	return &SignDataResult{
 		Signature:  signature,
