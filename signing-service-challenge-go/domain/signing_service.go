@@ -1,8 +1,6 @@
 package domain
 
 import (
-	"errors"
-	"fmt"
 	"strings"
 	"sync"
 
@@ -29,7 +27,7 @@ func NewSigningService(deviceRepo SignatureDeviceRepository) *SigningService {
 
 func (service *SigningService) CreateSignatureDevice(id string, label string, algorithm string) (*SignatureDevice, error) {
 	if _, err := uuid.Parse(id); err != nil {
-		return nil, errors.New("invalid id")
+		return nil, ErrorInvalidDeviceId()
 	}
 
 	// If we do not lock here then multiple devices with the same id might be created
@@ -39,7 +37,7 @@ func (service *SigningService) CreateSignatureDevice(id string, label string, al
 	repo := service.deviceRepo
 	existing := repo.GetSignatureDeviceById(id)
 	if existing != nil {
-		return nil, fmt.Errorf("device with id %s already exists", id)
+		return nil, ErrorDeviceAlreadyExists(id)
 	}
 
 	device, err := service.createSignatureDevice(id, label, algorithm)
@@ -73,7 +71,7 @@ func createSigner(algorithm string) (crypto.Signer, error) {
 	case AlgorithmECC:
 		return crypto.NewECCSigner()
 	default:
-		return nil, errors.New("invalid algorithm")
+		return nil, ErrorInvalidSigningAlgorithm()
 	}
 }
 

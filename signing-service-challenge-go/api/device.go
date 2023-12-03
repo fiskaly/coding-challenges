@@ -43,7 +43,16 @@ func (s *Server) CreateSignatureDevice(response http.ResponseWriter, request *ht
 	algorithm := request.Header.Get("algorithm")
 	device, err := s.signingService.CreateSignatureDevice(id, label, algorithm)
 	if err != nil {
-		WriteErrorResponse(response, http.StatusInternalServerError, []string{err.Error()})
+		if apiError, ok := err.(domain.ApiError); ok {
+			code := apiError.Code
+			if code == domain.InvalidDeviceId || code == domain.InvalidSigningAlgorithm {
+				WriteErrorResponse(response, http.StatusBadRequest, []string{err.Error()})
+			} else if code == domain.DeviceAlreadyExists {
+				WriteErrorResponse(response, http.StatusConflict, []string{err.Error()})
+			} else {
+				WriteErrorResponse(response, http.StatusInternalServerError, []string{http.StatusText(http.StatusInternalServerError)})
+			}
+		}
 	} else {
 		WriteAPIResponse(response, http.StatusCreated, CreateSignatureDeviceResponse{Id: device.Id})
 	}
