@@ -59,3 +59,17 @@ func (m ECCMarshaler) Decode(privateKeyBytes []byte) (*ECCKeyPair, error) {
 		Public:  &privateKey.PublicKey,
 	}, nil
 }
+
+func Sign(dataToBeSigned []byte, privateKeyBytes []byte) ([]byte, error) {
+	msgHash := SHA256.New()
+	_, err = msgHash.Write(dataToBeSigned)
+	if err != nil {
+		return nil, err
+	}
+	msgHashSum := msgHash.Sum(nil)
+	keyPair, err = Unmarshal(privateKeyBytes)
+	if err != nil {
+		return nil, err
+	}
+	return ecdsa.SignASN1(rand.Reader, keyPair.Public, msgHashSum)
+}

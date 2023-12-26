@@ -52,3 +52,20 @@ func (m *RSAMarshaler) Unmarshal(privateKeyBytes []byte) (*RSAKeyPair, error) {
 		Public:  &privateKey.PublicKey,
 	}, nil
 }
+
+func Sign(dataToBeSigned []byte, privateKeyBytes []byte) ([]byte, error) {
+	
+	msgHash := SHA256.New()
+	_, err = msgHash.Write(dataToBeSigned)
+	if err != nil {
+		return nil, err
+	}
+	msgHashSum := msgHash.Sum(nil)
+
+	keyPair, err = Unmarshal(privateKeyBytes)
+	if (err != nil) {
+		return nil, err
+	}
+	return rsa.SignPSS(rand.Reader, keyPair.Private, crypto.SHA256, msgHashSum, nil)
+
+}
