@@ -22,7 +22,7 @@ func NewECCMarshaler() ECCMarshaler {
 
 // Encode takes an ECCKeyPair and encodes it to be written on disk.
 // It returns the public and the private key as a byte slice.
-func (m ECCMarshaler) Encode(keyPair ECCKeyPair) ([]byte, []byte, error) {
+func (m ECCMarshaler) Marshal(keyPair ECCKeyPair) ([]byte, []byte, error) {
 	privateKeyBytes, err := x509.MarshalECPrivateKey(keyPair.Private)
 	if err != nil {
 		return nil, nil, err
@@ -47,7 +47,7 @@ func (m ECCMarshaler) Encode(keyPair ECCKeyPair) ([]byte, []byte, error) {
 }
 
 // Decode assembles an ECCKeyPair from an encoded private key.
-func (m ECCMarshaler) Decode(privateKeyBytes []byte) (*ECCKeyPair, error) {
+func (m ECCMarshaler) Unmarshal(privateKeyBytes []byte) (*ECCKeyPair, error) {
 	block, _ := pem.Decode(privateKeyBytes)
 	privateKey, err := x509.ParseECPrivateKey(block.Bytes)
 	if err != nil {
@@ -58,18 +58,4 @@ func (m ECCMarshaler) Decode(privateKeyBytes []byte) (*ECCKeyPair, error) {
 		Private: privateKey,
 		Public:  &privateKey.PublicKey,
 	}, nil
-}
-
-func Sign(dataToBeSigned []byte, privateKeyBytes []byte) ([]byte, error) {
-	msgHash := SHA256.New()
-	_, err = msgHash.Write(dataToBeSigned)
-	if err != nil {
-		return nil, err
-	}
-	msgHashSum := msgHash.Sum(nil)
-	keyPair, err = Unmarshal(privateKeyBytes)
-	if err != nil {
-		return nil, err
-	}
-	return ecdsa.SignASN1(rand.Reader, keyPair.Public, msgHashSum)
 }

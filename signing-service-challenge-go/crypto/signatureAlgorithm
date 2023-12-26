@@ -1,0 +1,8 @@
+package crypto
+
+type SignatureAlgorithm string
+
+const (
+	RSA   SignatureAlgorithm = "RSA"
+	ECDSA SignatureAlgorithm = "ECDSA"
+)

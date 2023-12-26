@@ -1,6 +1,0 @@
-package enum
-
-type SignatureAlgorithm int32 const (
-	RSA   MessageType = 0
-	ECDSA MessageType = 1
-)

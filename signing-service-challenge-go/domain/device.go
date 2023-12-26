@@ -1,15 +1,14 @@
 package domain
 
 import (
-    "fmt"
-    "github.com/google/uuid"
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/crypto"
 )
 
 type SignatureDevice struct {
-	id uuid.uuid
-	publicKey []byte
-	privateKey []byte
-	algorithm enum.signatureAlgorithm
-	signatureCounter int64
-	lastSignature string
+	Id               string
+	PublicKey        []byte
+	Algorithm        crypto.SignatureAlgorithm
+	SignatureCounter int64
+	LastSignature    string
+	Alias            string
 }
