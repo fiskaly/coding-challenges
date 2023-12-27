@@ -86,6 +86,15 @@ func SignTransaction(deviceId string, data string) (api.SignatureResponse, error
 
 }
 
+func getDeviceInfo(deviceId string) (api.SignatureDeviceInfoResponse, error) {
+	repo := persistence.New()
+	device, err := repo.FindDeviceById(deviceId)
+	if err != nil {
+		return api.SignatureDeviceInfoResponse{}, err
+	}
+	return *device.GetSignatureDeviceInfoResponse(), err
+}
+
 func generateRSAKeys() ([]byte, string, error) {
 	rsaGenerator := crypto.NewRSAGenerator()
 	keypair, err := rsaGenerator.Generate()
