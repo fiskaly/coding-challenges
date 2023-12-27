@@ -10,6 +10,10 @@ import (
 // RSAGenerator generates a RSA key pair.
 type RSAGenerator struct{}
 
+func NewRSAGenerator() RSAGenerator {
+	return RSAGenerator{}
+}
+
 // Generate generates a new RSAKeyPair.
 func (g *RSAGenerator) Generate() (*RSAKeyPair, error) {
 	// Security has been ignored for the sake of simplicity.
@@ -26,6 +30,10 @@ func (g *RSAGenerator) Generate() (*RSAKeyPair, error) {
 
 // ECCGenerator generates an ECC key pair.
 type ECCGenerator struct{}
+
+func NewECCGenerator() ECCGenerator {
+	return ECCGenerator{}
+}
 
 // Generate generates a new ECCKeyPair.
 func (g *ECCGenerator) Generate() (*ECCKeyPair, error) {

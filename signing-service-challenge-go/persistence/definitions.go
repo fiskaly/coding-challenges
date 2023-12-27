@@ -1,7 +1,7 @@
 package persistence
 
 import (
-	"github.com/fiskaly/coding-challenges/signing-service-challenge/domain"
+	"github.com/fiskaly/coding-challenges/signing-service-challenge-go/domain"
 )
 
 type DeviceRepository interface {

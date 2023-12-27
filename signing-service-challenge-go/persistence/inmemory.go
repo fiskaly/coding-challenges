@@ -4,12 +4,18 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/fiskaly/coding-challenges/signing-service-challenge/domain"
+	"github.com/fiskaly/coding-challenges/signing-service-challenge-go/domain"
 )
 
 type InMemoryDeviceRepository struct {
 	repository map[string]domain.SignatureDevice
 	sync.Mutex
+}
+
+func New() InMemoryDeviceRepository {
+	return InMemoryDeviceRepository{
+		repository: make(map[string]domain.SignatureDevice),
+	}
 }
 
 func (dr *InMemoryDeviceRepository) FindDeviceById(id string) (domain.SignatureDevice, error) {
