@@ -8,10 +8,7 @@ import (
 	"github.com/fiskaly/coding-challenges/signing-service-challenge-go/domain"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge-go/persistence"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge-go/service"
-	"github.com/google/uuid"
 )
-
-// TODO: REST endpoints ...
 
 type CreateSignatureRequest struct {
 	Data string `json:"data"`
@@ -53,10 +50,9 @@ func (s *Server) CreateSignature(response http.ResponseWriter, request *http.Req
 	}
 	signTransactionResponse, err := service.SignTransaction(deviceId, createSignatureRequest.Data)
 	if err != nil {
-		errorId := uuid.New().String()
-		fmt.Printf("[CreateSignature] %s\n%s\n", errorId, err)
 		WriteErrorResponse(response, http.StatusInternalServerError, []string{
-			"Error occured while signing, please provide the following error id for support: " + errorId,
+			"Error occured while signing:",
+			err.Error(),
 		})
 		return
 	}
@@ -76,10 +72,9 @@ func (s *Server) createSignatureDevice(response http.ResponseWriter, request *ht
 	fmt.Printf("Creating device with id [%s]...\n", device.Id)
 	createSignatureDeviceResponse, err := service.CreateSignatureDevice(device)
 	if err != nil {
-		errorId := uuid.New().String()
-		fmt.Printf("[CreateSignatureDevice] %s\n%s\n", errorId, err)
 		WriteErrorResponse(response, http.StatusInternalServerError, []string{
-			"Error occured while generating device, please provide the following error id for support: " + errorId,
+			"Error occured while generating device:",
+			err.Error(),
 		})
 		return
 	}
@@ -100,10 +95,9 @@ func (s *Server) getSignatureDeviceInfo(response http.ResponseWriter, request *h
 
 	getDeviceInfoResponse, err := service.GetDeviceInfo(deviceId)
 	if err != nil {
-		errorId := uuid.New().String()
-		fmt.Printf("[GetSignatureDeviceInfo] %s\n%s\n", errorId, err)
 		WriteErrorResponse(response, http.StatusInternalServerError, []string{
-			"Error occured while finding device, please provide the following error id for support: " + errorId,
+			"Error occured while finding device:",
+			err.Error(),
 		})
 		return
 	}

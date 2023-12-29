@@ -1,7 +1,10 @@
 package crypto
 
 import (
+	"crypto"
+	"crypto/ecdsa"
 	"crypto/rand"
+	"crypto/rsa"
 	"crypto/sha256"
 	"fmt"
 )
@@ -45,22 +48,28 @@ func getHashSum(dataToBeSigned []byte) ([]byte, error) {
 }
 
 func (signer RSASigner) Sign(dataToBeSigned []byte) ([]byte, error) {
+	hash, err := getHashSum(dataToBeSigned)
+	if err != nil {
+		return nil, err
+	}
 	keyPair, err := signer.marshaller.Unmarshal(signer.privateKeyBytes)
 	if err != nil {
 		return nil, err
 	}
-	return keyPair.Private.Sign(rand.Reader, dataToBeSigned, nil)
+	return rsa.SignPKCS1v15(rand.Reader, keyPair.Private, crypto.SHA256, hash[:])
 }
 
 func (signer ECCSigner) Sign(dataToBeSigned []byte) ([]byte, error) {
+	hash, err := getHashSum(dataToBeSigned)
+	if err != nil {
+		return nil, err
+	}
 	keyPair, err := signer.marshaller.Unmarshal(signer.privateKeyBytes)
 	if err != nil {
 		return nil, err
 	}
-	return keyPair.Private.Sign(rand.Reader, dataToBeSigned, nil)
+	return ecdsa.SignASN1(rand.Reader, keyPair.Private, hash[:])
 }
-
-type SignatureAlgorithm string
 
 type SignatureAlgorithmRegistry struct {
 	RSA           string
