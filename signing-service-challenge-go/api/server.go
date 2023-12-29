@@ -3,6 +3,8 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 // Response is the generic API response container.
@@ -30,13 +32,21 @@ func NewServer(listenAddress string) *Server {
 
 // Run registers all HandlerFuncs for the existing HTTP routes and starts the Server.
 func (s *Server) Run() error {
-	mux := http.NewServeMux()
+	router := mux.NewRouter()
+	router.HandleFunc("/api/v0/health", s.Health).Methods(http.MethodGet)
+	router.HandleFunc("/api/v1/device", s.Device).Methods(http.MethodPost, http.MethodGet)
+	router.HandleFunc("/api/v1/device/sign", s.CreateSignature).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/device/all", s.GetAllDevices).Methods(http.MethodGet)
 
-	mux.Handle("/api/v0/health", http.HandlerFunc(s.Health))
+	// mux := http.NewServeMux()
+
+	// mux.Handle("/api/v0/health", http.HandlerFunc(s.Health))
+	// mux.Handle("/api/v1/device", http.HandlerFunc(s.Device))
+	// mux.Handle("/api/v1/device/sign", http.HandlerFunc(s.CreateSignature))
 
 	// TODO: register further HandlerFuncs here ...
 
-	return http.ListenAndServe(s.listenAddress, mux)
+	return http.ListenAndServe(s.listenAddress, router)
 }
 
 // WriteInternalError writes a default internal error message as an HTTP response.
@@ -60,6 +70,12 @@ func WriteErrorResponse(w http.ResponseWriter, code int, errors []string) {
 	}
 
 	w.Write(bytes)
+}
+
+func CheckHttpMethod(w http.ResponseWriter, request http.Request, method string) {
+	if request.Method != method {
+
+	}
 }
 
 // WriteAPIResponse takes an HTTP status code and a generic data struct

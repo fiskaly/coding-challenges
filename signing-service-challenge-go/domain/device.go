@@ -1,21 +1,51 @@
 package domain
 
 import (
-	"github.com/fiskaly/coding-challenges/signing-service-challenge-go/api"
-	"github.com/fiskaly/coding-challenges/signing-service-challenge-go/crypto"
+	"strings"
 )
 
 type SignatureDevice struct {
 	Id               string
 	PrivateKeyBytes  []byte
-	PublicKey        string
-	Algorithm        crypto.SignatureAlgorithm
+	PublicKey        []byte
+	Algorithm        string
 	SignatureCounter int64
 	LastSignature    []byte
 	Alias            string
 }
 
-func NewSignatureDevice(id string, privateKeyBytes []byte, publicKey string, algorithm crypto.SignatureAlgorithm, alias string) *SignatureDevice {
+type CreateSignatureDeviceResponse struct {
+	DeviceId  string `json:"device_id"`
+	PublicKey []byte `json:"public_key"`
+	Algorithm string `json:"signature_algorithm"`
+	Alias     string `json:"alias"`
+}
+
+type CreateSignatureDeviceRequest struct {
+	DeviceId  string `json:"device_id"`
+	Algorithm string `json:"signature_algorithm"`
+	Alias     string `json:"alias"`
+}
+
+type CreateSignatureResponse struct {
+	DeviceId          string `json:"device_id"`
+	Signature         []byte `json:"signature"`
+	SignaturesCreated int64  `json:"signature_counter"`
+	PublicKey         []byte `json:"public_key"`
+	Algorithm         string `json:"signature_algorithm"`
+	Alias             string `json:"alias"`
+}
+
+type SignatureDeviceInfoResponse struct {
+	DeviceId          string `json:"device_id"`
+	PublicKey         []byte `json:"public_key"`
+	Algorithm         string `json:"signature_algorithm"`
+	SignaturesCreated int64  `json:"signature_counter"`
+	LastSignature     []byte `json:"last_generated_signature"`
+	Alias             string `json:"alias"`
+}
+
+func NewSignatureDevice(id string, privateKeyBytes []byte, publicKey []byte, algorithm string, alias string) *SignatureDevice {
 	return &SignatureDevice{
 		Id:               id,
 		PrivateKeyBytes:  privateKeyBytes,
@@ -27,8 +57,16 @@ func NewSignatureDevice(id string, privateKeyBytes []byte, publicKey string, alg
 	}
 }
 
-func (device SignatureDevice) GetCreSignatureDeviceResponse() *api.CreateSignatureDeviceResponse {
-	return &api.CreateSignatureDeviceResponse{
+func GetSignatureDeviceFromRequest(request CreateSignatureDeviceRequest) *SignatureDevice {
+	return &SignatureDevice{
+		Id:        request.DeviceId,
+		Algorithm: strings.ToUpper(request.Algorithm),
+		Alias:     request.Alias,
+	}
+}
+
+func (device SignatureDevice) GetCreateSignatureDeviceResponse() *CreateSignatureDeviceResponse {
+	return &CreateSignatureDeviceResponse{
 		DeviceId:  device.Id,
 		PublicKey: device.PublicKey,
 		Algorithm: device.Algorithm,
@@ -36,10 +74,10 @@ func (device SignatureDevice) GetCreSignatureDeviceResponse() *api.CreateSignatu
 	}
 }
 
-func (device SignatureDevice) GetSignatureResponse() *api.SignatureResponse {
-	return &api.SignatureResponse{
+func (device SignatureDevice) GetSignatureResponse() *CreateSignatureResponse {
+	return &CreateSignatureResponse{
 		DeviceId:          device.Id,
-		Signature:         string(device.LastSignature),
+		Signature:         device.LastSignature,
 		PublicKey:         device.PublicKey,
 		SignaturesCreated: device.SignatureCounter,
 		Algorithm:         device.Algorithm,
@@ -47,10 +85,10 @@ func (device SignatureDevice) GetSignatureResponse() *api.SignatureResponse {
 	}
 }
 
-func (device SignatureDevice) GetSignatureDeviceInfoResponse() *api.SignatureDeviceInfoResponse {
-	return &api.SignatureDeviceInfoResponse{
+func (device SignatureDevice) GetSignatureDeviceInfoResponse() *SignatureDeviceInfoResponse {
+	return &SignatureDeviceInfoResponse{
 		DeviceId:          device.Id,
-		LastSignature:     string(device.LastSignature),
+		LastSignature:     device.LastSignature,
 		PublicKey:         device.PublicKey,
 		SignaturesCreated: device.SignatureCounter,
 		Algorithm:         device.Algorithm,

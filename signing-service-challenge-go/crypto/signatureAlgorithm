@@ -1,12 +1,9 @@
 package crypto
 
-type signatureAlgorithm string
-
-type SignatureAlgorithmRegistry struct {
-	RSA           string
-	ECDSA         string
-	AlgorithmList []string
-}
+const (
+	RSA   = "RSA"
+	ECDSA = "ECDSA"
+)
 
 func NewSignatureAlgorithmRegistry() SignatureAlgorithmRegistry {
 	rsa := "RSA"

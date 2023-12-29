@@ -43,6 +43,8 @@ func (g *ECCGenerator) Generate() (*ECCKeyPair, error) {
 		return nil, err
 	}
 
+	key.Curve.Params()
+
 	return &ECCKeyPair{
 		Public:  &key.PublicKey,
 		Private: key,
