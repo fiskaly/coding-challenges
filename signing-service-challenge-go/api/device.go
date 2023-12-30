@@ -92,14 +92,7 @@ func (s *Server) CreateSignature(response http.ResponseWriter, request *http.Req
 // Fetches the specified device and writes all the public info for the device
 func (s *Server) GetSignatureDeviceInfo(response http.ResponseWriter, request *http.Request) {
 
-	deviceId := request.URL.Query().Get("id")
-	if deviceId == "" {
-		WriteErrorResponse(response, http.StatusBadRequest, []string{
-			http.StatusText(http.StatusBadRequest),
-			"Please supply the device ID in the \"id\" query parameter",
-		})
-		return
-	}
+	deviceId := mux.Vars(request)["id"]
 
 	getDeviceInfoResponse, err := service.GetDeviceInfo(deviceId)
 	if err != nil {
