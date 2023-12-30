@@ -12,9 +12,12 @@ type inMemoryDeviceRepository struct {
 	lock       sync.Mutex
 }
 
-var lock = &sync.Mutex{}
+// insance functions as a singleton
 var instance *inMemoryDeviceRepository
+var lock = &sync.Mutex{}
 
+// Gets the instance of the in memory device repository.
+// If no instance exists, a new instance is created.
 func Get() *inMemoryDeviceRepository {
 	if instance == nil {
 		lock.Lock()
@@ -29,16 +32,15 @@ func Get() *inMemoryDeviceRepository {
 	return instance
 }
 
-func (dr *inMemoryDeviceRepository) FindDeviceById(id string) (domain.SignatureDevice, error) {
+// Find device by id. Returns device and boolean marking if the device was found
+func (dr *inMemoryDeviceRepository) FindDeviceById(id string) (domain.SignatureDevice, bool) {
 	dr.lock.Lock()
 	defer dr.lock.Unlock()
 	device, exists := dr.repository[id]
-	if !exists {
-		return domain.SignatureDevice{}, fmt.Errorf("[FindDeviceById] device with specified ID doesn't exist: \"%s\"", id)
-	}
-	return device, nil
+	return device, exists
 }
 
+// Create new device. Will return error if device with same ID already exists.
 func (dr *inMemoryDeviceRepository) NewDevice(device domain.SignatureDevice) error {
 	dr.lock.Lock()
 	defer dr.lock.Unlock()
@@ -50,6 +52,7 @@ func (dr *inMemoryDeviceRepository) NewDevice(device domain.SignatureDevice) err
 	return nil
 }
 
+// Update existing device. Will return error if evice with same ID does not exist.
 func (dr *inMemoryDeviceRepository) UpdateDevice(device domain.SignatureDevice) error {
 	dr.lock.Lock()
 	defer dr.lock.Unlock()
@@ -61,6 +64,7 @@ func (dr *inMemoryDeviceRepository) UpdateDevice(device domain.SignatureDevice) 
 	return nil
 }
 
+// Returns ID's of all existing devices
 func (dr *inMemoryDeviceRepository) GetAllDevices() []string {
 	dr.lock.Lock()
 	defer dr.lock.Unlock()

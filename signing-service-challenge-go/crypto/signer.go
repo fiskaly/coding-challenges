@@ -26,27 +26,6 @@ func NewRSASigner(privateKey []byte) RSASigner {
 	}
 }
 
-type ECCSigner struct {
-	marshaller      ECCMarshaler
-	privateKeyBytes []byte
-}
-
-func NewECCSigner(privateKey []byte) ECCSigner {
-	return ECCSigner{
-		marshaller:      NewECCMarshaler(),
-		privateKeyBytes: privateKey,
-	}
-}
-
-func getHashSum(dataToBeSigned []byte) ([]byte, error) {
-	msgHash := sha256.New()
-	_, err := msgHash.Write(dataToBeSigned)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get hash sum: %w", err)
-	}
-	return msgHash.Sum(nil), nil
-}
-
 func (signer RSASigner) Sign(dataToBeSigned []byte) ([]byte, error) {
 	hash, err := getHashSum(dataToBeSigned)
 	if err != nil {
@@ -57,6 +36,18 @@ func (signer RSASigner) Sign(dataToBeSigned []byte) ([]byte, error) {
 		return nil, err
 	}
 	return rsa.SignPKCS1v15(rand.Reader, keyPair.Private, crypto.SHA256, hash[:])
+}
+
+type ECCSigner struct {
+	marshaller      ECCMarshaler
+	privateKeyBytes []byte
+}
+
+func NewECCSigner(privateKey []byte) ECCSigner {
+	return ECCSigner{
+		marshaller:      NewECCMarshaler(),
+		privateKeyBytes: privateKey,
+	}
 }
 
 func (signer ECCSigner) Sign(dataToBeSigned []byte) ([]byte, error) {
@@ -71,18 +62,11 @@ func (signer ECCSigner) Sign(dataToBeSigned []byte) ([]byte, error) {
 	return ecdsa.SignASN1(rand.Reader, keyPair.Private, hash[:])
 }
 
-type SignatureAlgorithmRegistry struct {
-	RSA           string
-	ECDSA         string
-	AlgorithmList []string
-}
-
-func NewSignatureAlgorithmRegistry() SignatureAlgorithmRegistry {
-	rsa := "RSA"
-	ecdsa := "ECDSA"
-	return SignatureAlgorithmRegistry{
-		RSA:           rsa,
-		ECDSA:         ecdsa,
-		AlgorithmList: []string{rsa, ecdsa},
+func getHashSum(dataToBeSigned []byte) ([]byte, error) {
+	msgHash := sha256.New()
+	_, err := msgHash.Write(dataToBeSigned)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get hash sum: %w", err)
 	}
+	return msgHash.Sum(nil), nil
 }
