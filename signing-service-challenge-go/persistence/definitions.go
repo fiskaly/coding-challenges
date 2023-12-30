@@ -5,7 +5,8 @@ import (
 )
 
 type DeviceRepository interface {
-	FindDeviceById(id string) (domain.SignatureDevice, error)
+	FindDeviceById(id string) (domain.SignatureDevice, bool)
 	NewDevice(device domain.SignatureDevice) error
 	UpdateDevice(device domain.SignatureDevice) error
+	GetAllDevices() []string
 }

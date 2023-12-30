@@ -6,8 +6,6 @@ import (
 	"net/http"
 
 	"github.com/fiskaly/coding-challenges/signing-service-challenge-go/domain"
-	"github.com/fiskaly/coding-challenges/signing-service-challenge-go/persistence"
-	"github.com/fiskaly/coding-challenges/signing-service-challenge-go/service"
 	"github.com/gorilla/mux"
 )
 
@@ -46,7 +44,7 @@ func (s *Server) createSignatureDevice(response http.ResponseWriter, request *ht
 	}
 	device := domain.GetSignatureDeviceFromRequest(createDeviceRequest)
 	fmt.Printf("Creating device with id [%s]...\n", device.Id)
-	createSignatureDeviceResponse, err := service.CreateSignatureDevice(device)
+	createSignatureDeviceResponse, err := s.signatureService.CreateSignatureDevice(device)
 	if err != nil {
 		WriteErrorResponse(response, http.StatusInternalServerError, []string{
 			"Error occured while generating device:",
@@ -60,8 +58,8 @@ func (s *Server) createSignatureDevice(response http.ResponseWriter, request *ht
 
 // Fetches and writes all created device ID's
 func (s *Server) getAllDevices(response http.ResponseWriter, request *http.Request) {
-	repo := persistence.Get()
-	WriteAPIResponse(response, http.StatusOK, repo.GetAllDevices())
+	allDevices := s.signatureService.GetAllDevices()
+	WriteAPIResponse(response, http.StatusOK, allDevices)
 }
 
 // Creates a signature for the supplied data using the selected device.
@@ -78,7 +76,7 @@ func (s *Server) CreateSignature(response http.ResponseWriter, request *http.Req
 		})
 		return
 	}
-	signTransactionResponse, err := service.SignTransaction(deviceId, createSignatureRequest.Data)
+	signTransactionResponse, err := s.signatureService.SignTransaction(deviceId, createSignatureRequest.Data)
 	if err != nil {
 		WriteErrorResponse(response, http.StatusInternalServerError, []string{
 			"Error occured while signing:",
@@ -94,7 +92,7 @@ func (s *Server) GetSignatureDeviceInfo(response http.ResponseWriter, request *h
 
 	deviceId := mux.Vars(request)["id"]
 
-	getDeviceInfoResponse, err := service.GetDeviceInfo(deviceId)
+	getDeviceInfoResponse, err := s.signatureService.GetDeviceInfo(deviceId)
 	if err != nil {
 		WriteErrorResponse(response, http.StatusInternalServerError, []string{
 			"Error occured while finding device:",

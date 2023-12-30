@@ -13,13 +13,26 @@ import (
 	"github.com/fiskaly/coding-challenges/signing-service-challenge-go/persistence"
 )
 
+type SignatureServiceImplementation struct {
+	rsaGenerator   crypto.RSAGenerator
+	ecdsaGenerator crypto.ECCGenerator
+	repo           persistence.DeviceRepository
+}
+
+func New() *SignatureServiceImplementation {
+	return &SignatureServiceImplementation{
+		rsaGenerator:   crypto.NewRSAGenerator(),
+		ecdsaGenerator: crypto.NewECCGenerator(),
+		repo:           persistence.Get(),
+	}
+}
+
 // CreateSignatureDevice will create a new domain.SignatureDevice based on the supplied signature device.
 // The keys for this device will be generated based on the selected signing algorithm.
 // Returns a domain.CreateSignatureDeviceResponse entity ready to be sent in API response
-func CreateSignatureDevice(device *domain.SignatureDevice) (domain.CreateSignatureDeviceResponse, error) {
+func (service *SignatureServiceImplementation) CreateSignatureDevice(device *domain.SignatureDevice) (domain.CreateSignatureDeviceResponse, error) {
 	var privateKeyBytes, publicKey []byte
 	var err error
-	repo := persistence.Get()
 
 	//check if input is valid
 	if len(device.Id) < 3 {
@@ -30,7 +43,7 @@ func CreateSignatureDevice(device *domain.SignatureDevice) (domain.CreateSignatu
 	}
 
 	//check if device exists
-	_, exists := repo.FindDeviceById(device.Id)
+	_, exists := service.repo.FindDeviceById(device.Id)
 	if exists {
 		return domain.CreateSignatureDeviceResponse{}, errors.New("[CreateSignatureDevice] device with specified ID already exists")
 	}
@@ -41,9 +54,9 @@ func CreateSignatureDevice(device *domain.SignatureDevice) (domain.CreateSignatu
 		return domain.CreateSignatureDeviceResponse{}, errors.New("algorithm, not supported: " + device.Algorithm)
 	}
 	if strings.Compare(signatureAlgorithmRegistry.RSA, device.Algorithm) == 0 {
-		privateKeyBytes, publicKey, err = generateRSAKeys()
+		privateKeyBytes, publicKey, err = service.generateRSAKeys()
 	} else if strings.Compare(signatureAlgorithmRegistry.ECDSA, device.Algorithm) == 0 {
-		privateKeyBytes, publicKey, err = generateECDSAKeys()
+		privateKeyBytes, publicKey, err = service.generateECDSAKeys()
 	}
 	if err != nil {
 		return domain.CreateSignatureDeviceResponse{}, err
@@ -52,7 +65,7 @@ func CreateSignatureDevice(device *domain.SignatureDevice) (domain.CreateSignatu
 	//create device and save it
 	device.PrivateKeyBytes = privateKeyBytes
 	device.PublicKey = publicKey
-	err = repo.NewDevice(*device)
+	err = service.repo.NewDevice(*device)
 	if err != nil {
 		return domain.CreateSignatureDeviceResponse{}, err
 	}
@@ -62,9 +75,8 @@ func CreateSignatureDevice(device *domain.SignatureDevice) (domain.CreateSignatu
 
 // generates an RSA keypair
 // returns private key, public key
-func generateRSAKeys() ([]byte, []byte, error) {
-	rsaGenerator := crypto.NewRSAGenerator()
-	keypair, err := rsaGenerator.Generate()
+func (service *SignatureServiceImplementation) generateRSAKeys() ([]byte, []byte, error) {
+	keypair, err := service.rsaGenerator.Generate()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -77,9 +89,8 @@ func generateRSAKeys() ([]byte, []byte, error) {
 
 // generates an ECDSA keypair
 // returns private key, public key
-func generateECDSAKeys() ([]byte, []byte, error) {
-	eccGenerator := crypto.NewECCGenerator()
-	keypair, err := eccGenerator.Generate()
+func (service *SignatureServiceImplementation) generateECDSAKeys() ([]byte, []byte, error) {
+	keypair, err := service.ecdsaGenerator.Generate()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -91,14 +102,13 @@ func generateECDSAKeys() ([]byte, []byte, error) {
 
 // Signs the supplied data with the device.
 // Returns a domain.CreateSignatureResponse entity ready to be sent in API response
-func SignTransaction(deviceId string, data string) (domain.CreateSignatureResponse, error) {
-	repo := persistence.Get()
-	signatureDevice, exists := repo.FindDeviceById(deviceId)
+func (service *SignatureServiceImplementation) SignTransaction(deviceId string, data string) (domain.CreateSignatureResponse, error) {
+	signatureDevice, exists := service.repo.FindDeviceById(deviceId)
 	if !exists {
 		return domain.CreateSignatureResponse{}, fmt.Errorf("[FindDeviceById] device with specified ID doesn't exist: \"%s\"", deviceId)
 	}
 	//build signing string
-	signing_string := buildSigningString(signatureDevice, data)
+	signing_string := service.buildSigningString(signatureDevice, data)
 
 	//get signer and sign
 	signatureAlgorithmRegistry := crypto.NewSignatureAlgorithmRegistry()
@@ -118,7 +128,7 @@ func SignTransaction(deviceId string, data string) (domain.CreateSignatureRespon
 	//update device and save it
 	signatureDevice.LastSignature = signature
 	signatureDevice.SignatureCounter += 1
-	err = repo.UpdateDevice(signatureDevice)
+	err = service.repo.UpdateDevice(signatureDevice)
 	if err != nil {
 		return domain.CreateSignatureResponse{}, err
 	}
@@ -126,7 +136,7 @@ func SignTransaction(deviceId string, data string) (domain.CreateSignatureRespon
 }
 
 // Builds the signing string for a device & data combo
-func buildSigningString(signatureDevice domain.SignatureDevice, data string) string {
+func (service *SignatureServiceImplementation) buildSigningString(signatureDevice domain.SignatureDevice, data string) string {
 	var part1, part2, part3 string
 	part1 = fmt.Sprint(signatureDevice.SignatureCounter)
 	part2 = data
@@ -139,11 +149,14 @@ func buildSigningString(signatureDevice domain.SignatureDevice, data string) str
 }
 
 // Returns all the information on a specified device in the form of domain.SignatureDeviceInfoResponse, ready to be returned by API
-func GetDeviceInfo(deviceId string) (domain.SignatureDeviceInfoResponse, error) {
-	repo := persistence.Get()
-	device, exists := repo.FindDeviceById(deviceId)
+func (service *SignatureServiceImplementation) GetDeviceInfo(deviceId string) (domain.SignatureDeviceInfoResponse, error) {
+	device, exists := service.repo.FindDeviceById(deviceId)
 	if !exists {
 		return domain.SignatureDeviceInfoResponse{}, fmt.Errorf("[FindDeviceById] device with specified ID doesn't exist: \"%s\"", deviceId)
 	}
 	return *device.GetSignatureDeviceInfoResponse(), nil
+}
+
+func (service *SignatureServiceImplementation) GetAllDevices() []string {
+	return service.repo.GetAllDevices()
 }

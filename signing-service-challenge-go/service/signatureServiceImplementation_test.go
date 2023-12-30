@@ -45,9 +45,11 @@ func TestBuildSigningString(t *testing.T) {
 		Want:  fmt.Sprintf("%d_%s_%s", 1, text, base64.StdEncoding.EncodeToString(testDevice2.LastSignature)),
 	}
 
+	service := New()
+
 	for _, tt := range testingInputs {
 		t.Run(tt.Name, func(t *testing.T) {
-			ans := buildSigningString(tt.Input, text)
+			ans := service.buildSigningString(tt.Input, text)
 			if ans != tt.Want {
 				t.Errorf("got %s, want %s", ans, tt.Want)
 			}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/fiskaly/coding-challenges/signing-service-challenge-go/service"
 	"github.com/gorilla/mux"
 )
 
@@ -19,13 +20,15 @@ type ErrorResponse struct {
 
 // Server manages HTTP requests and dispatches them to the appropriate services.
 type Server struct {
-	listenAddress string
+	listenAddress    string
+	signatureService service.SignatureService
 }
 
 // NewServer is a factory to instantiate a new Server.
 func NewServer(listenAddress string) *Server {
 	return &Server{
-		listenAddress: listenAddress,
+		listenAddress:    listenAddress,
+		signatureService: service.New(),
 		// TODO: add services / further dependencies here ...
 	}
 }
