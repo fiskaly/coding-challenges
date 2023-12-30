@@ -4,6 +4,8 @@ import (
 	"strings"
 )
 
+//TODO: unite -Response types into one and use ,omitempty
+
 type SignatureDevice struct {
 	Id               string
 	PrivateKeyBytes  []byte

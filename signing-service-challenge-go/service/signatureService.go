@@ -133,7 +133,7 @@ func buildSigningString(signatureDevice domain.SignatureDevice, data string) str
 	if signatureDevice.SignatureCounter == 0 {
 		part3 = base64.StdEncoding.EncodeToString([]byte(signatureDevice.Id))
 	} else {
-		part3 = string(signatureDevice.LastSignature)
+		part3 = base64.StdEncoding.EncodeToString(signatureDevice.LastSignature)
 	}
 	return fmt.Sprintf("%s_%s_%s", part1, part2, part3)
 }

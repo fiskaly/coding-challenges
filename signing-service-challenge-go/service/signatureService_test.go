@@ -42,7 +42,7 @@ func TestBuildSigningString(t *testing.T) {
 	testingInputs[1] = testingInput{
 		Name:  "when past signatures present, use last signature",
 		Input: testDevice2,
-		Want:  fmt.Sprintf("%d_%s_%s", 1, text, string(testDevice2.LastSignature)),
+		Want:  fmt.Sprintf("%d_%s_%s", 1, text, base64.StdEncoding.EncodeToString(testDevice2.LastSignature)),
 	}
 
 	for _, tt := range testingInputs {
