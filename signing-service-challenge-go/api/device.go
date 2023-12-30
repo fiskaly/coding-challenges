@@ -8,6 +8,7 @@ import (
 	"github.com/fiskaly/coding-challenges/signing-service-challenge-go/domain"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge-go/persistence"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge-go/service"
+	"github.com/gorilla/mux"
 )
 
 type CreateSignatureRequest struct {
@@ -19,7 +20,7 @@ func (s *Server) Device(response http.ResponseWriter, request *http.Request) {
 		s.createSignatureDevice(response, request)
 		return
 	} else if request.Method == http.MethodGet {
-		s.getSignatureDeviceInfo(response, request)
+		s.getAllDevices(response, request)
 		return
 	} else {
 		WriteErrorResponse(response, http.StatusMethodNotAllowed, []string{
@@ -31,14 +32,7 @@ func (s *Server) Device(response http.ResponseWriter, request *http.Request) {
 
 func (s *Server) CreateSignature(response http.ResponseWriter, request *http.Request) {
 
-	deviceId := request.URL.Query().Get("id")
-	if deviceId == "" {
-		WriteErrorResponse(response, http.StatusBadRequest, []string{
-			http.StatusText(http.StatusBadRequest),
-			"Please supply the device ID in the \"id\" query parameter",
-		})
-		return
-	}
+	deviceId := mux.Vars(request)["id"]
 
 	var createSignatureRequest CreateSignatureRequest
 	err := json.NewDecoder(request.Body).Decode(&createSignatureRequest)
@@ -82,7 +76,7 @@ func (s *Server) createSignatureDevice(response http.ResponseWriter, request *ht
 	WriteAPIResponse(response, http.StatusOK, createSignatureDeviceResponse)
 }
 
-func (s *Server) getSignatureDeviceInfo(response http.ResponseWriter, request *http.Request) {
+func (s *Server) GetSignatureDeviceInfo(response http.ResponseWriter, request *http.Request) {
 
 	deviceId := request.URL.Query().Get("id")
 	if deviceId == "" {
@@ -105,7 +99,7 @@ func (s *Server) getSignatureDeviceInfo(response http.ResponseWriter, request *h
 	WriteAPIResponse(response, http.StatusOK, getDeviceInfoResponse)
 }
 
-func (s *Server) GetAllDevices(response http.ResponseWriter, request *http.Request) {
+func (s *Server) getAllDevices(response http.ResponseWriter, request *http.Request) {
 	repo := persistence.Get()
 	WriteAPIResponse(response, http.StatusOK, repo.GetAllDevices())
 }

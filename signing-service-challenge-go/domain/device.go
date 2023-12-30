@@ -30,6 +30,7 @@ type CreateSignatureDeviceRequest struct {
 type CreateSignatureResponse struct {
 	DeviceId          string `json:"device_id"`
 	Signature         []byte `json:"signature"`
+	SignedData        string `json:"signed_data"`
 	SignaturesCreated int64  `json:"signature_counter"`
 	PublicKey         []byte `json:"public_key"`
 	Algorithm         string `json:"signature_algorithm"`
@@ -74,10 +75,11 @@ func (device SignatureDevice) GetCreateSignatureDeviceResponse() *CreateSignatur
 	}
 }
 
-func (device SignatureDevice) GetSignatureResponse() *CreateSignatureResponse {
+func (device SignatureDevice) GetSignatureResponse(signedData string) *CreateSignatureResponse {
 	return &CreateSignatureResponse{
 		DeviceId:          device.Id,
 		Signature:         device.LastSignature,
+		SignedData:        signedData,
 		PublicKey:         device.PublicKey,
 		SignaturesCreated: device.SignatureCounter,
 		Algorithm:         device.Algorithm,

@@ -34,17 +34,9 @@ func NewServer(listenAddress string) *Server {
 func (s *Server) Run() error {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/v0/health", s.Health).Methods(http.MethodGet)
-	router.HandleFunc("/api/v1/device", s.Device).Methods(http.MethodPost, http.MethodGet)
-	router.HandleFunc("/api/v1/device/sign", s.CreateSignature).Methods(http.MethodPost)
-	router.HandleFunc("/api/v1/device/all", s.GetAllDevices).Methods(http.MethodGet)
-
-	// mux := http.NewServeMux()
-
-	// mux.Handle("/api/v0/health", http.HandlerFunc(s.Health))
-	// mux.Handle("/api/v1/device", http.HandlerFunc(s.Device))
-	// mux.Handle("/api/v1/device/sign", http.HandlerFunc(s.CreateSignature))
-
-	// TODO: register further HandlerFuncs here ...
+	router.HandleFunc("/api/v1/devices/{id}", s.GetSignatureDeviceInfo).Methods(http.MethodGet)
+	router.HandleFunc("/api/v1/devices/{id}/sign", s.CreateSignature).Methods(http.MethodPost)
+	router.HandleFunc("/api/v1/devices", s.Device).Methods(http.MethodGet, http.MethodPost)
 
 	return http.ListenAndServe(s.listenAddress, router)
 }

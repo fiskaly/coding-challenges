@@ -50,6 +50,18 @@ func CreateSignatureDevice(device *domain.SignatureDevice) (domain.CreateSignatu
 	return *device.GetCreateSignatureDeviceResponse(), nil
 }
 
+func buildSigningString(signatureDevice domain.SignatureDevice, data string) string {
+	var part1, part2, part3 string
+	part1 = fmt.Sprint(signatureDevice.SignatureCounter)
+	part2 = data
+	if signatureDevice.SignatureCounter == 0 {
+		part3 = base64.StdEncoding.EncodeToString([]byte(signatureDevice.Id))
+	} else {
+		part3 = string(signatureDevice.LastSignature)
+	}
+	return fmt.Sprintf("%s_%s_%s", part1, part2, part3)
+}
+
 func SignTransaction(deviceId string, data string) (domain.CreateSignatureResponse, error) {
 	repo := persistence.Get()
 	signatureDevice, err := repo.FindDeviceById(deviceId)
@@ -57,15 +69,7 @@ func SignTransaction(deviceId string, data string) (domain.CreateSignatureRespon
 		return domain.CreateSignatureResponse{}, err
 	}
 	//build signing string
-	var part1, part2, part3 string
-	part1 = fmt.Sprint(signatureDevice.SignatureCounter)
-	part2 = data
-	if signatureDevice.SignatureCounter == 0 {
-		part3 = base64.StdEncoding.EncodeToString([]byte(deviceId))
-	} else {
-		part3 = string(signatureDevice.LastSignature)
-	}
-	signing_string := fmt.Sprintf("%s_%s_%s", part1, part2, part3)
+	signing_string := buildSigningString(signatureDevice, data)
 
 	//get signer and sign
 	signatureAlgorithmRegistry := crypto.NewSignatureAlgorithmRegistry()
@@ -89,7 +93,7 @@ func SignTransaction(deviceId string, data string) (domain.CreateSignatureRespon
 	if err != nil {
 		return domain.CreateSignatureResponse{}, err
 	}
-	return *signatureDevice.GetSignatureResponse(), nil
+	return *signatureDevice.GetSignatureResponse(signing_string), nil
 
 }
 
