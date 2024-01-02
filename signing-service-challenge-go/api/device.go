@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -80,14 +81,15 @@ func (s *SignatureService) CreateSignatureDevice(w http.ResponseWriter, r *http.
 		return
 	}
 
-	if request.Algorithm != "ECC" && request.Algorithm != "RSA" {
+	algo := strings.ToUpper(request.Algorithm)
+	if algo != "ECC" && algo != "RSA" {
 		WriteErrorResponse(w, http.StatusBadRequest, []string{"Invalid algorithm"})
 		return
 	}
 
 	device := &domain.SignatureDevice{
 		ID:        deviceID,
-		Algorithm: request.Algorithm,
+		Algorithm: algo,
 		Label:     request.Label,
 	}
 
