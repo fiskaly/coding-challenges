@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+
 	"net/http"
 )
 
@@ -31,8 +32,11 @@ func NewServer(listenAddress string) *Server {
 // Run registers all HandlerFuncs for the existing HTTP routes and starts the Server.
 func (s *Server) Run() error {
 	mux := http.NewServeMux()
-
+	service := NewSignatureService()
 	mux.Handle("/api/v0/health", http.HandlerFunc(s.Health))
+	mux.HandleFunc("/api/v0/createdevice", http.HandlerFunc(service.CreateSignatureDevice))
+	mux.HandleFunc("/api/v0/signtransaction", http.HandlerFunc(service.SignTransaction))
+	mux.HandleFunc("/api/v0/checkdevice", http.HandlerFunc(service.CheckDeviceExists))
 
 	// TODO: register further HandlerFuncs here ...
 

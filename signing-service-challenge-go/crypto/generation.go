@@ -13,7 +13,7 @@ type RSAGenerator struct{}
 // Generate generates a new RSAKeyPair.
 func (g *RSAGenerator) Generate() (*RSAKeyPair, error) {
 	// Security has been ignored for the sake of simplicity.
-	key, err := rsa.GenerateKey(rand.Reader, 512)
+	key, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return nil, err
 	}
