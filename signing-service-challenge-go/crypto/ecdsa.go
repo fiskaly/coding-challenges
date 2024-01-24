@@ -22,13 +22,13 @@ func NewECCMarshaler() ECCMarshaler {
 
 // Encode takes an ECCKeyPair and encodes it to be written on disk.
 // It returns the public and the private key as a byte slice.
-func (m ECCMarshaler) Encode(keyPair ECCKeyPair) ([]byte, []byte, error) {
+func (m ECCMarshaler) Encode(keyPair ECCKeyPair) (encodedPublicKey, encodedPrivateKey []byte, err error) {
 	privateKeyBytes, err := x509.MarshalECPrivateKey(keyPair.Private)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	publicKeyBytes, err := x509.MarshalPKIXPublicKey(&keyPair.Public)
+	publicKeyBytes, err := x509.MarshalPKIXPublicKey(keyPair.Public)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -58,4 +58,26 @@ func (m ECCMarshaler) Decode(privateKeyBytes []byte) (*ECCKeyPair, error) {
 		Private: privateKey,
 		Public:  &privateKey.PublicKey,
 	}, nil
+}
+
+type ECCAlgorithm struct{}
+
+func (ecc ECCAlgorithm) Name() string {
+	return "ECC"
+}
+
+func (ecc ECCAlgorithm) GenerateEncodedPrivateKey() ([]byte, error) {
+	generator := ECCGenerator{}
+	keyPair, err := generator.Generate()
+	if err != nil {
+		return nil, err
+	}
+
+	marshaller := NewECCMarshaler()
+	_, privateKey, err := marshaller.Encode(*keyPair)
+	if err != nil {
+		return nil, err
+	}
+
+	return privateKey, nil
 }
