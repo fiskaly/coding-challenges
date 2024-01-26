@@ -17,14 +17,18 @@ type ErrorResponse struct {
 
 // Server manages HTTP requests and dispatches them to the appropriate services.
 type Server struct {
-	listenAddress string
+	listenAddress    string
+	signatureService SignatureService
 }
 
 // NewServer is a factory to instantiate a new Server.
-func NewServer(listenAddress string) *Server {
+func NewServer(
+	listenAddress string,
+	signatureService SignatureService,
+) *Server {
 	return &Server{
-		listenAddress: listenAddress,
-		// TODO: add services / further dependencies here ...
+		listenAddress:    listenAddress,
+		signatureService: signatureService,
 	}
 }
 
@@ -35,6 +39,7 @@ func (s *Server) Run() error {
 	mux.Handle("/api/v0/health", http.HandlerFunc(s.Health))
 
 	// TODO: register further HandlerFuncs here ...
+	mux.Handle("/api/v0/signature_devices", http.HandlerFunc(s.signatureService.CreateSignatureDevice))
 
 	return http.ListenAndServe(s.listenAddress, mux)
 }

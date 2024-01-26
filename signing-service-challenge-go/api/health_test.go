@@ -12,7 +12,7 @@ func TestHealth(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/api/v0/health", nil)
 	responseRecorder := httptest.NewRecorder()
 
-	server := api.NewServer("")
+	server := api.NewServer("", api.SignatureService{})
 	server.Health(responseRecorder, request)
 
 	expectedStatusCode := http.StatusOK
