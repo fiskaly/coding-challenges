@@ -38,13 +38,13 @@ func TestCreateSignatureDeviceResponse(t *testing.T) {
 
 	t.Run("fails when uuid is invalid", func(t *testing.T) {
 		id := "invalid-uuid"
-		algorithm := "RSA"
+		algorithmName := "RSA"
 		request := newJsonRequest(
 			http.MethodPost,
 			"/api/v0/signature_devices",
 			api.CreateSignatureDeviceRequest{
 				ID:        id,
-				Algorithm: algorithm,
+				Algorithm: algorithmName,
 			},
 		)
 		responseRecorder := httptest.NewRecorder()
@@ -69,13 +69,13 @@ func TestCreateSignatureDeviceResponse(t *testing.T) {
 
 	t.Run("fails when id already exists", func(t *testing.T) {
 		id := uuid.New()
-		algorithm := "RSA"
+		algorithm := crypto.RSAAlgorithm{}
 		request := newJsonRequest(
 			http.MethodPost,
 			"/api/v0/signature_devices",
 			api.CreateSignatureDeviceRequest{
 				ID:        id.String(),
-				Algorithm: algorithm,
+				Algorithm: algorithm.Name(),
 			},
 		)
 		responseRecorder := httptest.NewRecorder()
@@ -84,7 +84,7 @@ func TestCreateSignatureDeviceResponse(t *testing.T) {
 		// create existing device with the same id
 		repository.Create(domain.SignatureDevice{
 			ID:                id,
-			AlgorithmName:     algorithm,
+			Algorithm:         algorithm,
 			EncodedPrivateKey: []byte("SOME_KEY"),
 		})
 		service := api.NewSignatureService(repository)
@@ -106,13 +106,13 @@ func TestCreateSignatureDeviceResponse(t *testing.T) {
 
 	t.Run("fails when algorithm is invalid", func(t *testing.T) {
 		id := uuid.New()
-		algorithm := "ABC"
+		algorithmName := "ABC"
 		request := newJsonRequest(
 			http.MethodPost,
 			"/api/v0/signature_devices",
 			api.CreateSignatureDeviceRequest{
 				ID:        id.String(),
-				Algorithm: algorithm,
+				Algorithm: algorithmName,
 			},
 		)
 		responseRecorder := httptest.NewRecorder()
@@ -137,13 +137,13 @@ func TestCreateSignatureDeviceResponse(t *testing.T) {
 
 	t.Run("creates a SignatureDevice successfully", func(t *testing.T) {
 		id := uuid.New()
-		algorithm := "RSA"
+		algorithmName := "RSA"
 		request := newJsonRequest(
 			http.MethodPost,
 			"/api/v0/signature_devices",
 			api.CreateSignatureDeviceRequest{
 				ID:        id.String(),
-				Algorithm: algorithm,
+				Algorithm: algorithmName,
 			},
 		)
 		responseRecorder := httptest.NewRecorder()
@@ -181,8 +181,8 @@ func TestCreateSignatureDeviceResponse(t *testing.T) {
 		if device.ID != id {
 			t.Errorf("id not persisted correctly. expected: %s, got: %s", id, device.ID)
 		}
-		if device.AlgorithmName != algorithm {
-			t.Errorf("algorithm not persisted correctly. expected: %s, got: %s", algorithm, device.AlgorithmName)
+		if device.Algorithm.Name() != algorithmName {
+			t.Errorf("algorithm not persisted correctly. expected: %s, got: %s", algorithmName, device.Algorithm.Name())
 		}
 		if device.Label != "" {
 			t.Errorf("label not persisted correctly. expected blank string, got: %s", device.Label)
@@ -195,14 +195,14 @@ func TestCreateSignatureDeviceResponse(t *testing.T) {
 
 	t.Run("creates a SignatureDevice with a label successfully", func(t *testing.T) {
 		id := uuid.New()
-		algorithm := "RSA"
+		algorithmName := "RSA"
 		label := "my RSA key"
 		request := newJsonRequest(
 			http.MethodPost,
 			"/api/v0/signature_devices",
 			api.CreateSignatureDeviceRequest{
 				ID:        id.String(),
-				Algorithm: algorithm,
+				Algorithm: algorithmName,
 				Label:     label,
 			},
 		)
@@ -241,8 +241,8 @@ func TestCreateSignatureDeviceResponse(t *testing.T) {
 		if device.ID != id {
 			t.Errorf("id not persisted correctly. expected: %s, got: %s", id, device.ID)
 		}
-		if device.AlgorithmName != algorithm {
-			t.Errorf("algorithm not persisted correctly. expected: %s, got: %s", algorithm, device.AlgorithmName)
+		if device.Algorithm.Name() != algorithmName {
+			t.Errorf("algorithm not persisted correctly. expected: %s, got: %s", algorithmName, device.Algorithm.Name())
 		}
 		if device.Label != label {
 			t.Errorf("label not persisted correctly. expected: %s, got: %s", label, device.Label)

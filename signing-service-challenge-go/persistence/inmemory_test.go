@@ -3,6 +3,7 @@ package persistence
 import (
 	"testing"
 
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/crypto"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/domain"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
@@ -12,7 +13,7 @@ func TestCreate(t *testing.T) {
 	t.Run("persists the device in memory", func(t *testing.T) {
 		device := domain.SignatureDevice{
 			ID:                uuid.New(),
-			AlgorithmName:     "RSA",
+			Algorithm:         crypto.RSAAlgorithm{},
 			EncodedPrivateKey: []byte("SOME_RSA_KEY"),
 			Label:             "my rsa key",
 		}
@@ -44,14 +45,14 @@ func TestCreate(t *testing.T) {
 	t.Run("does not persist when id is not unique", func(t *testing.T) {
 		id := uuid.New()
 		alreadyExistingDevice := domain.SignatureDevice{
-			ID:            id,
-			AlgorithmName: "RSA",
-			Label:         "already existing rsa key",
+			ID:        id,
+			Algorithm: crypto.RSAAlgorithm{},
+			Label:     "already existing rsa key",
 		}
 		duplicateIdDevice := domain.SignatureDevice{
-			ID:            id,
-			AlgorithmName: "RSA",
-			Label:         "new rsa key",
+			ID:        id,
+			Algorithm: crypto.RSAAlgorithm{},
+			Label:     "new rsa key",
 		}
 
 		repository := NewInMemorySignatureDeviceRepository()
@@ -83,7 +84,7 @@ func TestFind(t *testing.T) {
 	t.Run("returns the device when device with id exists", func(t *testing.T) {
 		device := domain.SignatureDevice{
 			ID:                uuid.New(),
-			AlgorithmName:     "RSA",
+			Algorithm:         crypto.RSAAlgorithm{},
 			EncodedPrivateKey: []byte("SOME_RSA_KEY"),
 			Label:             "my rsa key",
 		}

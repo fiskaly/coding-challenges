@@ -18,7 +18,7 @@ type SignatureAlgorithm interface {
 
 type SignatureDevice struct {
 	ID                uuid.UUID
-	AlgorithmName     string
+	Algorithm         SignatureAlgorithm
 	EncodedPrivateKey []byte
 	// (optional) user provided string to be displayed in the UI
 	Label string
@@ -37,7 +37,7 @@ func BuildSignatureDevice(id uuid.UUID, algorithm SignatureAlgorithm, label ...s
 
 	device := SignatureDevice{
 		ID:                id,
-		AlgorithmName:     algorithm.Name(),
+		Algorithm:         algorithm,
 		EncodedPrivateKey: encodedPrivateKey,
 	}
 

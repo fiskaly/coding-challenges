@@ -32,8 +32,8 @@ func TestBuildSignatureDevice(t *testing.T) {
 			t.Errorf("expected id: %s, got: %s", id, device.ID.String())
 		}
 
-		if device.AlgorithmName != algorithm.Name() {
-			t.Errorf("expected algorithm: %s, got: %s", algorithm.Name(), device.AlgorithmName)
+		if device.Algorithm.Name() != algorithm.Name() {
+			t.Errorf("expected algorithm: %s, got: %s", algorithm.Name(), device.Algorithm.Name())
 		}
 
 		if device.SignatureCounter != 0 {
