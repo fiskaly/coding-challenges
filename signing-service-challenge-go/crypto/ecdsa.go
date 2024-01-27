@@ -60,6 +60,10 @@ func (m ECCMarshaler) Decode(privateKeyBytes []byte) (*ECCKeyPair, error) {
 	}, nil
 }
 
+// Implements domain.SignatureAlgorithm for RSA.
+// Note that any actual logic is implemented in `ECCSigner`, `ECCMarshaller` and `ECCGenerator`,
+// and this struct merely acts as a facade to make this logic easier to access in the
+// `domain` package.
 type ECCAlgorithm struct{}
 
 func (ecc ECCAlgorithm) Name() string {
@@ -80,4 +84,15 @@ func (ecc ECCAlgorithm) GenerateEncodedPrivateKey() ([]byte, error) {
 	}
 
 	return privateKey, nil
+}
+
+func (ecc ECCAlgorithm) SignTransaction(encodedPrivateKey []byte, dataToBeSigned []byte) ([]byte, error) {
+	marshaller := NewECCMarshaler()
+	keyPair, err := marshaller.Decode(encodedPrivateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	signer := ECCSigner{keyPair: *keyPair}
+	return signer.Sign(dataToBeSigned)
 }

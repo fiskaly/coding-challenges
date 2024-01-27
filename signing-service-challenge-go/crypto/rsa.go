@@ -53,6 +53,10 @@ func (m RSAMarshaler) Unmarshal(privateKeyBytes []byte) (*RSAKeyPair, error) {
 	}, nil
 }
 
+// Implements domain.SignatureAlgorithm for RSA.
+// Note that any actual logic is implemented in `RSASigner`, `RSAMarshaller` and `RSAGenerator`,
+// and this struct merely acts as a facade to make this logic easier to access in the
+// `domain` package.
 type RSAAlgorithm struct{}
 
 func (rsa RSAAlgorithm) Name() string {
@@ -73,4 +77,15 @@ func (rsa RSAAlgorithm) GenerateEncodedPrivateKey() ([]byte, error) {
 	}
 
 	return privateKey, nil
+}
+
+func (rsa RSAAlgorithm) SignTransaction(encodedPrivateKey []byte, dataToBeSigned []byte) ([]byte, error) {
+	marshaller := NewRSAMarshaler()
+	keyPair, err := marshaller.Unmarshal(encodedPrivateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	signer := RSASigner{keyPair: *keyPair}
+	return signer.Sign(dataToBeSigned)
 }

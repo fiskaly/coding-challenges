@@ -22,6 +22,16 @@ func (repository InMemorySignatureDeviceRepository) Create(device domain.Signatu
 	return nil
 }
 
+func (repository InMemorySignatureDeviceRepository) Update(device domain.SignatureDevice) error {
+	_, ok := repository.devices[device.ID]
+	if !ok {
+		return errors.New("cannot update signature device that does not exist")
+	}
+
+	repository.devices[device.ID] = device
+	return nil
+}
+
 func (repository InMemorySignatureDeviceRepository) Find(id uuid.UUID) (domain.SignatureDevice, bool, error) {
 	device, ok := repository.devices[id]
 	if !ok {

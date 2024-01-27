@@ -18,6 +18,10 @@ func (device MockSignatureAlgorithm) GenerateEncodedPrivateKey() ([]byte, error)
 	return device.encodedPrivateKey, nil
 }
 
+func (device MockSignatureAlgorithm) SignTransaction(encodedPrivateKey []byte, dataToBeSigned []byte) (signature []byte, err error) {
+	return nil, nil
+}
+
 func TestBuildSignatureDevice(t *testing.T) {
 	t.Run("successfully builds signature device", func(t *testing.T) {
 		id := uuid.New()
@@ -40,12 +44,12 @@ func TestBuildSignatureDevice(t *testing.T) {
 			t.Errorf("expected initial signature counter value to be 0, got: %d", device.SignatureCounter)
 		}
 
-		if device.LastSignature != "" {
-			t.Errorf("expected initial last signature value to be blank, got: %s", device.LastSignature)
+		if device.Base64EncodedLastSignature != "" {
+			t.Errorf("expected initial last signature value to be blank, got: %s", device.Base64EncodedLastSignature)
 		}
 
 		if string(device.EncodedPrivateKey) != string(algorithm.encodedPrivateKey) {
-			t.Errorf("expected encoded private key: %s, got: %s", algorithm.encodedPrivateKey, device.LastSignature)
+			t.Errorf("expected encoded private key: %s, got: %s", algorithm.encodedPrivateKey, device.Base64EncodedLastSignature)
 		}
 
 		if device.Label != "" {

@@ -14,6 +14,7 @@ import (
 type SignatureAlgorithm interface {
 	Name() string
 	GenerateEncodedPrivateKey() ([]byte, error)
+	SignTransaction(encodedPrivateKey []byte, dataToBeSigned []byte) (signature []byte, err error)
 }
 
 type SignatureDevice struct {
@@ -23,9 +24,16 @@ type SignatureDevice struct {
 	// (optional) user provided string to be displayed in the UI
 	Label string
 	// track the last signature created with this device
-	LastSignature string
+	Base64EncodedLastSignature string
 	// track how many signatures have been created with this device
 	SignatureCounter uint
+}
+
+func (device SignatureDevice) SignTransaction(dataToBeSigned string) ([]byte, error) {
+	return device.Algorithm.SignTransaction(
+		device.EncodedPrivateKey,
+		[]byte(dataToBeSigned),
+	)
 }
 
 func BuildSignatureDevice(id uuid.UUID, algorithm SignatureAlgorithm, label ...string) (SignatureDevice, error) {
@@ -50,5 +58,6 @@ func BuildSignatureDevice(id uuid.UUID, algorithm SignatureAlgorithm, label ...s
 
 type SignatureDeviceRepository interface {
 	Create(device SignatureDevice) error
+	Update(device SignatureDevice) error
 	Find(id uuid.UUID) (SignatureDevice, bool, error)
 }
