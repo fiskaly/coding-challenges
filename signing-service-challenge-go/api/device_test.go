@@ -258,7 +258,7 @@ func TestSignTransaction(t *testing.T) {
 			t,
 			http.MethodPost,
 			fmt.Sprintf("%s/api/v0/signature_devices/%s/signatures", testServer.URL, id),
-			api.SignTransactionRequest{Data: "some-data"},
+			api.SignTransactionRequest{DataToBeSigned: "some-data"},
 		)
 
 		// check status code
@@ -299,7 +299,7 @@ func TestSignTransaction(t *testing.T) {
 			t,
 			http.MethodPost,
 			fmt.Sprintf("%s/api/v0/signature_devices/%s/signatures", testServer.URL, id),
-			api.SignTransactionRequest{Data: dataToSign},
+			api.SignTransactionRequest{DataToBeSigned: dataToSign},
 		)
 
 		// check status code
@@ -380,7 +380,7 @@ func TestSignTransaction(t *testing.T) {
 			t,
 			http.MethodPost,
 			fmt.Sprintf("%s/api/v0/signature_devices/%s/signatures", testServer.URL, id),
-			api.SignTransactionRequest{Data: dataToSign},
+			api.SignTransactionRequest{DataToBeSigned: dataToSign},
 		)
 
 		// check status code
@@ -459,7 +459,7 @@ func TestSignTransaction(t *testing.T) {
 			t,
 			http.MethodPost,
 			fmt.Sprintf("%s/api/v0/signature_devices/%s/signatures", testServer.URL, id),
-			api.SignTransactionRequest{Data: dataToSign},
+			api.SignTransactionRequest{DataToBeSigned: dataToSign},
 		)
 
 		// check status code
@@ -540,7 +540,7 @@ func TestSignTransaction(t *testing.T) {
 			t,
 			http.MethodPost,
 			fmt.Sprintf("%s/api/v0/signature_devices/%s/signatures", testServer.URL, id),
-			api.SignTransactionRequest{Data: dataToSign},
+			api.SignTransactionRequest{DataToBeSigned: dataToSign},
 		)
 
 		// check status code

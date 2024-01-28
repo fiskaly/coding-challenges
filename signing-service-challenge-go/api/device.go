@@ -89,7 +89,7 @@ func (s *SignatureService) CreateSignatureDevice(response http.ResponseWriter, r
 }
 
 type SignTransactionRequest struct {
-	Data string `json:"data"`
+	DataToBeSigned string `json:"data_to_be_signed"`
 }
 
 type SignTransactionResponse struct {
@@ -131,7 +131,7 @@ func (s *SignatureService) SignTransaction(response http.ResponseWriter, request
 	encodedSignature, signedData, err := domain.SignTransaction(
 		device,
 		s.signatureDeviceRepository,
-		requestBody.Data,
+		requestBody.DataToBeSigned,
 	)
 	if err != nil {
 		WriteInternalError(response)
