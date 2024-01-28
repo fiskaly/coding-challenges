@@ -6,21 +6,27 @@ import (
 	"testing"
 
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/api"
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/persistence"
 )
 
 func TestHealth(t *testing.T) {
-	request := httptest.NewRequest(http.MethodGet, "/api/v0/health", nil)
-	responseRecorder := httptest.NewRecorder()
+	repository := persistence.NewInMemorySignatureDeviceRepository()
+	signatureService := api.NewSignatureService(repository)
+	server := httptest.NewServer(api.NewServer("", signatureService).HTTPHandler())
+	defer server.Close()
 
-	server := api.NewServer("", api.SignatureService{})
-	server.Health(responseRecorder, request)
+	response := sendJsonRequest(
+		t,
+		http.MethodGet,
+		server.URL+"/api/v0/health",
+	)
 
 	expectedStatusCode := http.StatusOK
-	if responseRecorder.Code != expectedStatusCode {
-		t.Errorf("expected status code: %d, got: %d", expectedStatusCode, responseRecorder.Code)
+	if response.StatusCode != expectedStatusCode {
+		t.Errorf("expected status code: %d, got: %d", expectedStatusCode, response.StatusCode)
 	}
 
-	body := responseRecorder.Body.String()
+	body := readBody(t, response)
 	expectedBody := `{
   "data": {
     "status": "pass",

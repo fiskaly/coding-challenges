@@ -1,8 +1,6 @@
 package api_test
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -19,29 +17,31 @@ import (
 func TestCreateSignatureDeviceResponse(t *testing.T) {
 	t.Run("fails when uuid is invalid", func(t *testing.T) {
 		id := "invalid-uuid"
-		algorithmName := "RSA"
-		request := newJsonRequest(
+		algorithmName := crypto.RSAGenerator{}.AlgorithmName()
+
+		repository := persistence.NewInMemorySignatureDeviceRepository()
+		signatureService := api.NewSignatureService(repository)
+		server := httptest.NewServer(api.NewServer("", signatureService).HTTPHandler())
+		defer server.Close()
+
+		response := sendJsonRequest(
+			t,
 			http.MethodPost,
-			"/api/v0/signature_devices",
+			server.URL+"/api/v0/signature_devices",
 			api.CreateSignatureDeviceRequest{
 				ID:        id,
 				Algorithm: algorithmName,
 			},
 		)
-		responseRecorder := httptest.NewRecorder()
-
-		repository := persistence.NewInMemorySignatureDeviceRepository()
-		service := api.NewSignatureService(repository)
-		service.CreateSignatureDevice(responseRecorder, request)
 
 		// check status code
 		expectedStatusCode := http.StatusBadRequest
-		if responseRecorder.Code != expectedStatusCode {
-			t.Errorf("expected status code: %d, got: %d", expectedStatusCode, responseRecorder.Code)
+		if response.StatusCode != expectedStatusCode {
+			t.Errorf("expected status code: %d, got: %d", expectedStatusCode, response.StatusCode)
 		}
 
 		// check body
-		body := responseRecorder.Body.String()
+		body := readBody(t, response)
 		expectedBody := `{"errors":["id is not a valid uuid"]}`
 		if body != expectedBody {
 			t.Errorf("expected: %s, got: %s", expectedBody, body)
@@ -50,39 +50,41 @@ func TestCreateSignatureDeviceResponse(t *testing.T) {
 
 	t.Run("fails when id already exists", func(t *testing.T) {
 		id := uuid.New()
+
+		// create existing device with the id
 		generator := crypto.RSAGenerator{}
-		request := newJsonRequest(
+		keyPair, err := generator.Generate()
+		if err != nil {
+			t.Fatal(err)
+		}
+		repository := persistence.NewInMemorySignatureDeviceRepository()
+		repository.Create(domain.SignatureDevice{
+			ID:      id,
+			KeyPair: keyPair,
+		})
+
+		signatureService := api.NewSignatureService(repository)
+		server := httptest.NewServer(api.NewServer("", signatureService).HTTPHandler())
+		defer server.Close()
+
+		response := sendJsonRequest(
+			t,
 			http.MethodPost,
-			"/api/v0/signature_devices",
+			server.URL+"/api/v0/signature_devices",
 			api.CreateSignatureDeviceRequest{
 				ID:        id.String(),
 				Algorithm: generator.AlgorithmName(),
 			},
 		)
-		responseRecorder := httptest.NewRecorder()
-
-		keyPair, err := generator.Generate()
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		repository := persistence.NewInMemorySignatureDeviceRepository()
-		// create existing device with the same id
-		repository.Create(domain.SignatureDevice{
-			ID:      id,
-			KeyPair: keyPair,
-		})
-		service := api.NewSignatureService(repository)
-		service.CreateSignatureDevice(responseRecorder, request)
 
 		// check status code
 		expectedStatusCode := http.StatusBadRequest
-		if responseRecorder.Code != expectedStatusCode {
-			t.Errorf("expected status code: %d, got: %d", expectedStatusCode, responseRecorder.Code)
+		if response.StatusCode != expectedStatusCode {
+			t.Errorf("expected status code: %d, got: %d", expectedStatusCode, response.StatusCode)
 		}
 
 		// check body
-		body := responseRecorder.Body.String()
+		body := readBody(t, response)
 		expectedBody := `{"errors":["duplicate id"]}`
 		if body != expectedBody {
 			t.Errorf("expected: %s, got: %s", expectedBody, body)
@@ -92,28 +94,30 @@ func TestCreateSignatureDeviceResponse(t *testing.T) {
 	t.Run("fails when algorithm is invalid", func(t *testing.T) {
 		id := uuid.New()
 		algorithmName := "ABC"
-		request := newJsonRequest(
+
+		repository := persistence.NewInMemorySignatureDeviceRepository()
+		signatureService := api.NewSignatureService(repository)
+		server := httptest.NewServer(api.NewServer("", signatureService).HTTPHandler())
+		defer server.Close()
+
+		response := sendJsonRequest(
+			t,
 			http.MethodPost,
-			"/api/v0/signature_devices",
+			server.URL+"/api/v0/signature_devices",
 			api.CreateSignatureDeviceRequest{
 				ID:        id.String(),
 				Algorithm: algorithmName,
 			},
 		)
-		responseRecorder := httptest.NewRecorder()
-
-		repository := persistence.NewInMemorySignatureDeviceRepository()
-		service := api.NewSignatureService(repository)
-		service.CreateSignatureDevice(responseRecorder, request)
 
 		// check status code
 		expectedStatusCode := http.StatusBadRequest
-		if responseRecorder.Code != expectedStatusCode {
-			t.Errorf("expected status code: %d, got: %d", expectedStatusCode, responseRecorder.Code)
+		if response.StatusCode != expectedStatusCode {
+			t.Errorf("expected status code: %d, got: %d", expectedStatusCode, response.StatusCode)
 		}
 
 		// check body
-		body := responseRecorder.Body.String()
+		body := readBody(t, response)
 		expectedBody := `{"errors":["algorithm is not supported"]}`
 		if body != expectedBody {
 			t.Errorf("expected: %s, got: %s", expectedBody, body)
@@ -122,29 +126,31 @@ func TestCreateSignatureDeviceResponse(t *testing.T) {
 
 	t.Run("creates a SignatureDevice successfully", func(t *testing.T) {
 		id := uuid.New()
-		algorithmName := "RSA"
-		request := newJsonRequest(
+		algorithmName := crypto.RSAGenerator{}.AlgorithmName()
+
+		repository := persistence.NewInMemorySignatureDeviceRepository()
+		signatureService := api.NewSignatureService(repository)
+		server := httptest.NewServer(api.NewServer("", signatureService).HTTPHandler())
+		defer server.Close()
+
+		response := sendJsonRequest(
+			t,
 			http.MethodPost,
-			"/api/v0/signature_devices",
+			server.URL+"/api/v0/signature_devices",
 			api.CreateSignatureDeviceRequest{
 				ID:        id.String(),
 				Algorithm: algorithmName,
 			},
 		)
-		responseRecorder := httptest.NewRecorder()
-
-		repository := persistence.NewInMemorySignatureDeviceRepository()
-		service := api.NewSignatureService(repository)
-		service.CreateSignatureDevice(responseRecorder, request)
 
 		// check status code
 		expectedStatusCode := http.StatusCreated
-		if responseRecorder.Code != expectedStatusCode {
-			t.Errorf("expected status code: %d, got: %d", expectedStatusCode, responseRecorder.Code)
+		if response.StatusCode != expectedStatusCode {
+			t.Errorf("expected status code: %d, got: %d", expectedStatusCode, response.StatusCode)
 		}
 
 		// check body
-		body := responseRecorder.Body.String()
+		body := readBody(t, response)
 		expectedBody := fmt.Sprintf(`{
   "data": {
     "signatureDeviceId": "%s"
@@ -179,29 +185,31 @@ func TestCreateSignatureDeviceResponse(t *testing.T) {
 		id := uuid.New()
 		algorithmName := "RSA"
 		label := "my RSA key"
-		request := newJsonRequest(
+
+		repository := persistence.NewInMemorySignatureDeviceRepository()
+		signatureService := api.NewSignatureService(repository)
+		server := httptest.NewServer(api.NewServer("", signatureService).HTTPHandler())
+		defer server.Close()
+
+		response := sendJsonRequest(
+			t,
 			http.MethodPost,
-			"/api/v0/signature_devices",
+			server.URL+"/api/v0/signature_devices",
 			api.CreateSignatureDeviceRequest{
 				ID:        id.String(),
 				Algorithm: algorithmName,
 				Label:     label,
 			},
 		)
-		responseRecorder := httptest.NewRecorder()
-
-		repository := persistence.NewInMemorySignatureDeviceRepository()
-		service := api.NewSignatureService(repository)
-		service.CreateSignatureDevice(responseRecorder, request)
 
 		// check status code
 		expectedStatusCode := http.StatusCreated
-		if responseRecorder.Code != expectedStatusCode {
-			t.Errorf("expected status code: %d, got: %d", expectedStatusCode, responseRecorder.Code)
+		if response.StatusCode != expectedStatusCode {
+			t.Errorf("expected status code: %d, got: %d", expectedStatusCode, response.StatusCode)
 		}
 
 		// check body
-		body := responseRecorder.Body.String()
+		body := readBody(t, response)
 		expectedBody := fmt.Sprintf(`{
   "data": {
     "signatureDeviceId": "%s"
@@ -231,19 +239,4 @@ func TestCreateSignatureDeviceResponse(t *testing.T) {
 			t.Errorf("key pair generation failed: %s", err)
 		}
 	})
-}
-
-func newJsonRequest(httpMethod string, path string, serializableData any) *http.Request {
-	jsonBytes, err := json.Marshal(serializableData)
-	if err != nil {
-		panic(fmt.Sprintf("json.Marshal failed: err"))
-	}
-
-	request := httptest.NewRequest(
-		httpMethod,
-		path,
-		bytes.NewReader(jsonBytes),
-	)
-	request.Header.Set("Content-Type", "application/json")
-	return request
 }

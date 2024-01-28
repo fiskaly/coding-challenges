@@ -34,14 +34,16 @@ func NewServer(
 	}
 }
 
-// Run registers all HandlerFuncs for the existing HTTP routes and starts the Server.
-func (s *Server) Run() error {
+// Register all HandlerFuncs for routes
+func (s *Server) HTTPHandler() http.Handler {
 	mux := chi.NewMux()
-
 	mux.Get("/api/v0/health", http.HandlerFunc(s.Health))
 	mux.Post("/api/v0/signature_devices", http.HandlerFunc(s.signatureService.CreateSignatureDevice))
+	return mux
+}
 
-	return http.ListenAndServe(s.listenAddress, mux)
+func (s *Server) Run() error {
+	return http.ListenAndServe(s.listenAddress, s.HTTPHandler())
 }
 
 // WriteInternalError writes a default internal error message as an HTTP response.
