@@ -21,7 +21,7 @@ func NewSignatureService(repository domain.SignatureDeviceRepository) SignatureS
 }
 
 type CreateSignatureDeviceResponse struct {
-	ID string `json:"signatureDeviceId"`
+	ID string `json:"signature_device_id"`
 }
 
 type CreateSignatureDeviceRequest struct {

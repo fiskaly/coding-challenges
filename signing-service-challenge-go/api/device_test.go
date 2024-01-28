@@ -157,7 +157,7 @@ func TestCreateSignatureDeviceResponse(t *testing.T) {
 		body := readBody(t, response)
 		expectedBody := fmt.Sprintf(`{
   "data": {
-    "signatureDeviceId": "%s"
+    "signature_device_id": "%s"
   }
 }`, id)
 		diff := cmp.Diff(body, expectedBody)
@@ -216,7 +216,7 @@ func TestCreateSignatureDeviceResponse(t *testing.T) {
 		body := readBody(t, response)
 		expectedBody := fmt.Sprintf(`{
   "data": {
-    "signatureDeviceId": "%s"
+    "signature_device_id": "%s"
   }
 }`, id)
 		diff := cmp.Diff(body, expectedBody)
