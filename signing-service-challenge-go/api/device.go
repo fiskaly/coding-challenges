@@ -31,13 +31,6 @@ type CreateSignatureDeviceRequest struct {
 }
 
 func (s *SignatureService) CreateSignatureDevice(response http.ResponseWriter, request *http.Request) {
-	if request.Method != http.MethodPost {
-		WriteErrorResponse(response, http.StatusMethodNotAllowed, []string{
-			http.StatusText(http.StatusMethodNotAllowed),
-		})
-		return
-	}
-
 	var requestBody CreateSignatureDeviceRequest
 	err := json.NewDecoder(request.Body).Decode(&requestBody)
 	if err != nil {

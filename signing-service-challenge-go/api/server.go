@@ -3,6 +3,8 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
 )
 
 // Response is the generic API response container.
@@ -34,12 +36,10 @@ func NewServer(
 
 // Run registers all HandlerFuncs for the existing HTTP routes and starts the Server.
 func (s *Server) Run() error {
-	mux := http.NewServeMux()
+	mux := chi.NewMux()
 
-	mux.Handle("/api/v0/health", http.HandlerFunc(s.Health))
-
-	// TODO: register further HandlerFuncs here ...
-	mux.Handle("/api/v0/signature_devices", http.HandlerFunc(s.signatureService.CreateSignatureDevice))
+	mux.Get("/api/v0/health", http.HandlerFunc(s.Health))
+	mux.Post("/api/v0/signature_devices", http.HandlerFunc(s.signatureService.CreateSignatureDevice))
 
 	return http.ListenAndServe(s.listenAddress, mux)
 }

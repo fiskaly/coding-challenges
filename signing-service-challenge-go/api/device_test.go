@@ -17,25 +17,6 @@ import (
 )
 
 func TestCreateSignatureDeviceResponse(t *testing.T) {
-	t.Run("fails when method is not POST", func(t *testing.T) {
-		request := httptest.NewRequest(http.MethodGet, "/api/v0/signature_devices", nil)
-		responseRecorder := httptest.NewRecorder()
-
-		service := api.NewSignatureService(persistence.NewInMemorySignatureDeviceRepository())
-		service.CreateSignatureDevice(responseRecorder, request)
-
-		expectedStatusCode := http.StatusMethodNotAllowed
-		if responseRecorder.Code != expectedStatusCode {
-			t.Errorf("expected status code: %d, got: %d", expectedStatusCode, responseRecorder.Code)
-		}
-
-		body := responseRecorder.Body.String()
-		expectedBody := `{"errors":["Method Not Allowed"]}`
-		if body != expectedBody {
-			t.Errorf("expected: %s, got: %s", expectedBody, body)
-		}
-	})
-
 	t.Run("fails when uuid is invalid", func(t *testing.T) {
 		id := "invalid-uuid"
 		algorithmName := "RSA"
