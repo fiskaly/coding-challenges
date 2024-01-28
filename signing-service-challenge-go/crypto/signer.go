@@ -11,7 +11,7 @@ import (
 // makes collisions less likely.
 const HashFunction = stdcrypto.SHA384
 
-func computeHashDigest(b []byte) ([]byte, error) {
+func ComputeHashDigest(b []byte) ([]byte, error) {
 	hash := HashFunction.New()
 	_, err := hash.Write(b)
 	if err != nil {

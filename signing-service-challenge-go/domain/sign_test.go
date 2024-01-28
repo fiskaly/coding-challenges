@@ -83,11 +83,10 @@ func TestSignTransaction(t *testing.T) {
 
 func TestSecureDataToBeSigned(t *testing.T) {
 	t.Run("concatenates data with counter and last signature when counter > 0", func(t *testing.T) {
-		lastSignature := "last-signature"
 		base64EncodedLastSignature := "bGFzdC1zaWduYXR1cmU="
 
 		device := domain.SignatureDevice{
-			Base64EncodedLastSignature: lastSignature,
+			Base64EncodedLastSignature: base64EncodedLastSignature,
 			SignatureCounter:           1,
 		}
 		data := "some transaction data"

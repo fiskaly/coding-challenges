@@ -18,7 +18,7 @@ func TestRSASigner_Sign(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	digest, err := computeHashDigest([]byte(dataToBeSigned))
+	digest, err := ComputeHashDigest([]byte(dataToBeSigned))
 	if err != nil {
 		t.Fatal(err)
 	}
