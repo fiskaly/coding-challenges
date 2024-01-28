@@ -1,7 +1,6 @@
 package domain_test
 
 import (
-	stdCrypto "crypto"
 	"crypto/rsa"
 	"crypto/sha512"
 	"encoding/base64"
@@ -19,7 +18,7 @@ func TestSignTransaction(t *testing.T) {
 		dataToBeSigned := "some-transaction-data"
 		repository := persistence.NewInMemorySignatureDeviceRepository()
 		deviceId := uuid.MustParse("121fe402-762a-411a-8eeb-9e6c3ca16886")
-		device, err := domain.BuildSignatureDevice(deviceId, crypto.RSAAlgorithm{})
+		device, err := domain.BuildSignatureDevice(deviceId, crypto.RSAGenerator{})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -52,13 +51,10 @@ func TestSignTransaction(t *testing.T) {
 		}
 		digest := hash.Sum(nil)
 
-		keyPair, err := crypto.RSAMarshaler{}.Unmarshal(device.EncodedPrivateKey)
-		if err != nil {
-			t.Fatal(err)
-		}
+		rsaKeyPair := device.KeyPair.(*crypto.RSAKeyPair)
 		err = rsa.VerifyPSS(
-			keyPair.Public,
-			stdCrypto.SHA384,
+			rsaKeyPair.Public,
+			crypto.HashFunction,
 			digest,
 			decodedSignature,
 			nil,

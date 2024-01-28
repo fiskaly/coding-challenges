@@ -1,26 +1,30 @@
 package crypto
 
-import "testing"
+import (
+	"crypto/rsa"
+	"testing"
+)
 
-func TestRSAAlgorithm_Name(t *testing.T) {
-	rsa := RSAAlgorithm{}
-	name := rsa.Name()
-
-	if name != "RSA" {
-		t.Errorf("expected RSA, got: %s", name)
-	}
-}
-
-func TestRSAAlgorithm_GenerateEncodedPrivateKey(t *testing.T) {
-	rsa := RSAAlgorithm{}
-	encodedPrivateKey, err := rsa.GenerateEncodedPrivateKey()
-
+func TestRSASigner_Sign(t *testing.T) {
+	generator := RSAGenerator{}
+	keyPair, err := generator.generate()
 	if err != nil {
-		t.Errorf("expected no error, got %s", err)
+		t.Fatal(err)
 	}
 
-	_, err = NewRSAMarshaler().Unmarshal(encodedPrivateKey)
+	dataToBeSigned := "some-data"
+	signature, err := keyPair.Sign([]byte(dataToBeSigned))
 	if err != nil {
-		t.Errorf("decode of generated private key failed: %s", err)
+		t.Fatal(err)
+	}
+
+	digest, err := computeHashDigest([]byte(dataToBeSigned))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = rsa.VerifyPSS(keyPair.Public, HashFunction, digest, signature, nil)
+	if err != nil {
+		t.Errorf("signature verification failed: %s", err)
 	}
 }

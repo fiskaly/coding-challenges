@@ -67,7 +67,7 @@ func (s *SignatureService) CreateSignatureDevice(response http.ResponseWriter, r
 		return
 	}
 
-	algorithm, found := crypto.FindSupportedAlgorithm(requestBody.Algorithm)
+	generator, found := crypto.FindKeyPairGenerator(requestBody.Algorithm)
 	if !found {
 		WriteErrorResponse(response, http.StatusBadRequest, []string{
 			"algorithm is not supported",
@@ -75,7 +75,7 @@ func (s *SignatureService) CreateSignatureDevice(response http.ResponseWriter, r
 		return
 	}
 
-	device, err := domain.BuildSignatureDevice(id, algorithm, requestBody.Label)
+	device, err := domain.BuildSignatureDevice(id, generator, requestBody.Label)
 	if err != nil {
 		// In a real application, this error would be logged and sent to an error notification service
 		WriteInternalError(response)

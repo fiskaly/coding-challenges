@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"crypto/ecdsa"
+	"crypto/rand"
 	"crypto/x509"
 	"encoding/pem"
 )
@@ -10,6 +11,15 @@ import (
 type ECCKeyPair struct {
 	Public  *ecdsa.PublicKey
 	Private *ecdsa.PrivateKey
+}
+
+func (keyPair ECCKeyPair) Sign(dataToBeSigned []byte) ([]byte, error) {
+	digest, err := computeHashDigest(dataToBeSigned)
+	if err != nil {
+		return nil, err
+	}
+
+	return keyPair.Private.Sign(rand.Reader, digest, nil)
 }
 
 // ECCMarshaler can encode and decode an ECC key pair.
@@ -58,41 +68,4 @@ func (m ECCMarshaler) Decode(privateKeyBytes []byte) (*ECCKeyPair, error) {
 		Private: privateKey,
 		Public:  &privateKey.PublicKey,
 	}, nil
-}
-
-// Implements domain.SignatureAlgorithm for RSA.
-// Note that any actual logic is implemented in `ECCSigner`, `ECCMarshaller` and `ECCGenerator`,
-// and this struct merely acts as a facade to make this logic easier to access in the
-// `domain` package.
-type ECCAlgorithm struct{}
-
-func (ecc ECCAlgorithm) Name() string {
-	return "ECC"
-}
-
-func (ecc ECCAlgorithm) GenerateEncodedPrivateKey() ([]byte, error) {
-	generator := ECCGenerator{}
-	keyPair, err := generator.Generate()
-	if err != nil {
-		return nil, err
-	}
-
-	marshaller := NewECCMarshaler()
-	_, privateKey, err := marshaller.Encode(*keyPair)
-	if err != nil {
-		return nil, err
-	}
-
-	return privateKey, nil
-}
-
-func (ecc ECCAlgorithm) SignTransaction(encodedPrivateKey []byte, dataToBeSigned []byte) ([]byte, error) {
-	marshaller := NewECCMarshaler()
-	keyPair, err := marshaller.Decode(encodedPrivateKey)
-	if err != nil {
-		return nil, err
-	}
-
-	signer := ECCSigner{keyPair: *keyPair}
-	return signer.Sign(dataToBeSigned)
 }

@@ -69,23 +69,27 @@ func TestCreateSignatureDeviceResponse(t *testing.T) {
 
 	t.Run("fails when id already exists", func(t *testing.T) {
 		id := uuid.New()
-		algorithm := crypto.RSAAlgorithm{}
+		generator := crypto.RSAGenerator{}
 		request := newJsonRequest(
 			http.MethodPost,
 			"/api/v0/signature_devices",
 			api.CreateSignatureDeviceRequest{
 				ID:        id.String(),
-				Algorithm: algorithm.Name(),
+				Algorithm: generator.AlgorithmName(),
 			},
 		)
 		responseRecorder := httptest.NewRecorder()
 
+		keyPair, err := generator.Generate()
+		if err != nil {
+			t.Fatal(err)
+		}
+
 		repository := persistence.NewInMemorySignatureDeviceRepository()
 		// create existing device with the same id
 		repository.Create(domain.SignatureDevice{
-			ID:                id,
-			Algorithm:         algorithm,
-			EncodedPrivateKey: []byte("SOME_KEY"),
+			ID:      id,
+			KeyPair: keyPair,
 		})
 		service := api.NewSignatureService(repository)
 		service.CreateSignatureDevice(responseRecorder, request)
@@ -181,15 +185,12 @@ func TestCreateSignatureDeviceResponse(t *testing.T) {
 		if device.ID != id {
 			t.Errorf("id not persisted correctly. expected: %s, got: %s", id, device.ID)
 		}
-		if device.Algorithm.Name() != algorithmName {
-			t.Errorf("algorithm not persisted correctly. expected: %s, got: %s", algorithmName, device.Algorithm.Name())
-		}
 		if device.Label != "" {
 			t.Errorf("label not persisted correctly. expected blank string, got: %s", device.Label)
 		}
-		_, err = crypto.NewRSAMarshaler().Unmarshal(device.EncodedPrivateKey)
-		if err != nil {
-			t.Errorf("decode of generated private key failed: %s", err)
+		_, ok := device.KeyPair.(*crypto.RSAKeyPair)
+		if !ok {
+			t.Errorf("key pair generation failed: %s", err)
 		}
 	})
 
@@ -241,15 +242,12 @@ func TestCreateSignatureDeviceResponse(t *testing.T) {
 		if device.ID != id {
 			t.Errorf("id not persisted correctly. expected: %s, got: %s", id, device.ID)
 		}
-		if device.Algorithm.Name() != algorithmName {
-			t.Errorf("algorithm not persisted correctly. expected: %s, got: %s", algorithmName, device.Algorithm.Name())
-		}
 		if device.Label != label {
 			t.Errorf("label not persisted correctly. expected: %s, got: %s", label, device.Label)
 		}
-		_, err = crypto.NewRSAMarshaler().Unmarshal(device.EncodedPrivateKey)
-		if err != nil {
-			t.Errorf("decode of generated private key failed: %s", err)
+		_, ok := device.KeyPair.(*crypto.RSAKeyPair)
+		if !ok {
+			t.Errorf("key pair generation failed: %s", err)
 		}
 	})
 }

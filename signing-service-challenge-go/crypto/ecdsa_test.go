@@ -1,26 +1,30 @@
 package crypto
 
-import "testing"
+import (
+	"crypto/ecdsa"
+	"testing"
+)
 
-func TestECCAlgorithm_Name(t *testing.T) {
-	ecc := ECCAlgorithm{}
-	name := ecc.Name()
-
-	if name != "ECC" {
-		t.Errorf("expected ECC, got: %s", name)
-	}
-}
-
-func TestECCAlgorithm_GenerateEncodedPrivateKey(t *testing.T) {
-	ecc := ECCAlgorithm{}
-	encodedPrivateKey, err := ecc.GenerateEncodedPrivateKey()
-
+func TestECCKeyPair_Sign(t *testing.T) {
+	generator := ECCGenerator{}
+	keyPair, err := generator.generate()
 	if err != nil {
-		t.Errorf("expected no error, got %s", err)
+		t.Fatal(err)
 	}
 
-	_, err = NewECCMarshaler().Decode(encodedPrivateKey)
+	dataToBeSigned := "some-data"
+	signature, err := keyPair.Sign([]byte(dataToBeSigned))
 	if err != nil {
-		t.Errorf("decode of generated private key failed: %s", err)
+		t.Fatal(err)
+	}
+
+	digest, err := computeHashDigest([]byte(dataToBeSigned))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	result := ecdsa.VerifyASN1(keyPair.Public, digest, signature)
+	if !result {
+		t.Errorf("signature verification failed: %s", err)
 	}
 }

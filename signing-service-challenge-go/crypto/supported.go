@@ -2,15 +2,15 @@ package crypto
 
 import "github.com/fiskaly/coding-challenges/signing-service-challenge/domain"
 
-var SupportedAlgorithms = []domain.SignatureAlgorithm{
-	ECCAlgorithm{},
-	RSAAlgorithm{},
+var supportedGenerators = []domain.KeyPairGenerator{
+	ECCGenerator{},
+	RSAGenerator{},
 }
 
-func FindSupportedAlgorithm(name string) (domain.SignatureAlgorithm, bool) {
-	for _, algorithm := range SupportedAlgorithms {
-		if algorithm.Name() == name {
-			return algorithm, true
+func FindKeyPairGenerator(algorithmName string) (domain.KeyPairGenerator, bool) {
+	for _, generator := range supportedGenerators {
+		if generator.AlgorithmName() == algorithmName {
+			return generator, true
 		}
 	}
 

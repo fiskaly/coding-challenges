@@ -11,11 +11,14 @@ import (
 
 func TestCreate(t *testing.T) {
 	t.Run("persists the device in memory", func(t *testing.T) {
+		keyPair, err := crypto.RSAGenerator{}.Generate()
+		if err != nil {
+			t.Fatal(err)
+		}
 		device := domain.SignatureDevice{
-			ID:                uuid.New(),
-			Algorithm:         crypto.RSAAlgorithm{},
-			EncodedPrivateKey: []byte("SOME_RSA_KEY"),
-			Label:             "my rsa key",
+			ID:      uuid.New(),
+			KeyPair: keyPair,
+			Label:   "my rsa key",
 		}
 
 		repository := NewInMemorySignatureDeviceRepository()
@@ -24,7 +27,7 @@ func TestCreate(t *testing.T) {
 			t.Errorf("new repository should have 0 devices")
 		}
 
-		err := repository.Create(device)
+		err = repository.Create(device)
 		if err != nil {
 			t.Errorf("expected no error, got: %s", err)
 		}
@@ -45,14 +48,12 @@ func TestCreate(t *testing.T) {
 	t.Run("does not persist when id is not unique", func(t *testing.T) {
 		id := uuid.New()
 		alreadyExistingDevice := domain.SignatureDevice{
-			ID:        id,
-			Algorithm: crypto.RSAAlgorithm{},
-			Label:     "already existing rsa key",
+			ID:    id,
+			Label: "already existing rsa key",
 		}
 		duplicateIdDevice := domain.SignatureDevice{
-			ID:        id,
-			Algorithm: crypto.RSAAlgorithm{},
-			Label:     "new rsa key",
+			ID:    id,
+			Label: "new rsa key",
 		}
 
 		repository := NewInMemorySignatureDeviceRepository()
@@ -83,11 +84,14 @@ func TestCreate(t *testing.T) {
 func TestUpdate(t *testing.T) {
 	t.Run("updates attributes when device with id is found", func(t *testing.T) {
 		id := uuid.New()
+		keyPair, err := crypto.ECCGenerator{}.Generate()
+		if err != nil {
+			t.Fatal(err)
+		}
 		device := domain.SignatureDevice{
-			ID:                id,
-			Algorithm:         crypto.RSAAlgorithm{},
-			EncodedPrivateKey: []byte("SOME_RSA_KEY"),
-			Label:             "my rsa key",
+			ID:      id,
+			KeyPair: keyPair,
+			Label:   "my rsa key",
 		}
 
 		repository := NewInMemorySignatureDeviceRepository()
@@ -95,14 +99,13 @@ func TestUpdate(t *testing.T) {
 
 		updatedDevice := domain.SignatureDevice{
 			ID:                         id,
-			Algorithm:                  crypto.RSAAlgorithm{},
-			EncodedPrivateKey:          []byte("SOME_RSA_KEY"),
+			KeyPair:                    keyPair,
 			Label:                      "my rsa key",
 			SignatureCounter:           1,
 			Base64EncodedLastSignature: "last-signature",
 		}
 
-		err := repository.Update(updatedDevice)
+		err = repository.Update(updatedDevice)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err)
 		}
@@ -118,15 +121,18 @@ func TestUpdate(t *testing.T) {
 
 	t.Run("returns error when device with id is not found", func(t *testing.T) {
 		id := uuid.New()
+		keyPair, err := crypto.ECCGenerator{}.Generate()
+		if err != nil {
+			t.Fatal(err)
+		}
 		device := domain.SignatureDevice{
-			ID:                id,
-			Algorithm:         crypto.RSAAlgorithm{},
-			EncodedPrivateKey: []byte("SOME_RSA_KEY"),
-			Label:             "my rsa key",
+			ID:      id,
+			KeyPair: keyPair,
+			Label:   "my rsa key",
 		}
 
 		repository := NewInMemorySignatureDeviceRepository()
-		err := repository.Update(device)
+		err = repository.Update(device)
 		if err == nil {
 			t.Error("expected error when updating non-existent device")
 		}
@@ -136,10 +142,8 @@ func TestUpdate(t *testing.T) {
 func TestFind(t *testing.T) {
 	t.Run("returns the device when device with id exists", func(t *testing.T) {
 		device := domain.SignatureDevice{
-			ID:                uuid.New(),
-			Algorithm:         crypto.RSAAlgorithm{},
-			EncodedPrivateKey: []byte("SOME_RSA_KEY"),
-			Label:             "my rsa key",
+			ID:    uuid.New(),
+			Label: "my rsa key",
 		}
 
 		repository := NewInMemorySignatureDeviceRepository()

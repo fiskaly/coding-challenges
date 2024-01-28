@@ -19,7 +19,7 @@ func SignTransaction(
 ) {
 	securedDataToBeSigned := SecureDataToBeSigned(device, dataToBeSigned)
 
-	signature, err := device.SignTransaction(securedDataToBeSigned)
+	signature, err := device.Sign(securedDataToBeSigned)
 	if err != nil {
 		return "", "", errors.New(fmt.Sprintf("failed to sign transaction: %s", err))
 	}

@@ -6,27 +6,26 @@ import (
 	"github.com/google/uuid"
 )
 
-type MockSignatureAlgorithm struct {
-	encodedPrivateKey []byte
-}
+type MockKeyPair struct{}
 
-func (device MockSignatureAlgorithm) Name() string {
-	return "MOCK"
-}
-
-func (device MockSignatureAlgorithm) GenerateEncodedPrivateKey() ([]byte, error) {
-	return device.encodedPrivateKey, nil
-}
-
-func (device MockSignatureAlgorithm) SignTransaction(encodedPrivateKey []byte, dataToBeSigned []byte) (signature []byte, err error) {
+func (keyPair MockKeyPair) Sign(dataToBeSigned []byte) (signature []byte, err error) {
 	return nil, nil
+}
+
+type MockKeyPairGenerator struct{}
+
+func (g MockKeyPairGenerator) AlgorithmName() string {
+	return ""
+}
+
+func (g MockKeyPairGenerator) Generate() (KeyPair, error) {
+	return MockKeyPair{}, nil
 }
 
 func TestBuildSignatureDevice(t *testing.T) {
 	t.Run("successfully builds signature device", func(t *testing.T) {
 		id := uuid.New()
-		algorithm := MockSignatureAlgorithm{encodedPrivateKey: []byte("MOCK_KEY")}
-		device, err := BuildSignatureDevice(id, algorithm)
+		device, err := BuildSignatureDevice(id, MockKeyPairGenerator{})
 
 		if err != nil {
 			t.Errorf("expected no error, got: %s", err)
@@ -36,8 +35,8 @@ func TestBuildSignatureDevice(t *testing.T) {
 			t.Errorf("expected id: %s, got: %s", id, device.ID.String())
 		}
 
-		if device.Algorithm.Name() != algorithm.Name() {
-			t.Errorf("expected algorithm: %s, got: %s", algorithm.Name(), device.Algorithm.Name())
+		if device.KeyPair == nil {
+			t.Error("expected key pair to be set, got nil")
 		}
 
 		if device.SignatureCounter != 0 {
@@ -48,10 +47,6 @@ func TestBuildSignatureDevice(t *testing.T) {
 			t.Errorf("expected initial last signature value to be blank, got: %s", device.Base64EncodedLastSignature)
 		}
 
-		if string(device.EncodedPrivateKey) != string(algorithm.encodedPrivateKey) {
-			t.Errorf("expected encoded private key: %s, got: %s", algorithm.encodedPrivateKey, device.Base64EncodedLastSignature)
-		}
-
 		if device.Label != "" {
 			t.Errorf("expected label be blank when not provided, got: %s", device.Label)
 		}
@@ -59,11 +54,10 @@ func TestBuildSignatureDevice(t *testing.T) {
 
 	t.Run("sets label when provided", func(t *testing.T) {
 		id := uuid.New()
-		algorithm := MockSignatureAlgorithm{encodedPrivateKey: []byte("MOCK_KEY")}
 		label := "some-label"
 		device, err := BuildSignatureDevice(
 			id,
-			algorithm,
+			MockKeyPairGenerator{},
 			"some-label",
 		)
 
