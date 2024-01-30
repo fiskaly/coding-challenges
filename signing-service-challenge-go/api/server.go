@@ -18,25 +18,37 @@ type ErrorResponse struct {
 // Server manages HTTP requests and dispatches them to the appropriate services.
 type Server struct {
 	listenAddress string
+	mux           *http.ServeMux
 }
 
 // NewServer is a factory to instantiate a new Server.
 func NewServer(listenAddress string) *Server {
 	return &Server{
 		listenAddress: listenAddress,
+		mux:           http.NewServeMux(),
 		// TODO: add services / further dependencies here ...
 	}
 }
 
+//	func (s *Server) RegisterHandler(path string, handler http.HandlerFunc) {
+//		s.mux.HandleFunc(path, handler)
+//	}
+func (s *Server) SetupDeviceApiHandlers(handler DeviceHTTPHandler) {
+	for path, handlerFunc := range handler.GetRoutes() {
+		s.mux.Handle(path, http.HandlerFunc(handlerFunc))
+	}
+	//s.mux.Handle("/api/v0/device/create", http.HandlerFunc(handler.HandleCreateSignatureDeviceRequest))
+}
+
 // Run registers all HandlerFuncs for the existing HTTP routes and starts the Server.
 func (s *Server) Run() error {
-	mux := http.NewServeMux()
+	//mux := http.NewServeMux()
 
-	mux.Handle("/api/v0/health", http.HandlerFunc(s.Health))
+	s.mux.Handle("/api/v0/health", http.HandlerFunc(s.Health))
 
 	// TODO: register further HandlerFuncs here ...
 
-	return http.ListenAndServe(s.listenAddress, mux)
+	return http.ListenAndServe(s.listenAddress, s.mux)
 }
 
 // WriteInternalError writes a default internal error message as an HTTP response.
@@ -77,4 +89,13 @@ func WriteAPIResponse(w http.ResponseWriter, code int, data interface{}) {
 	}
 
 	w.Write(bytes)
+}
+func ValidateMethod(w http.ResponseWriter, r *http.Request, allowedMethod string) bool {
+	if r.Method != allowedMethod {
+		WriteErrorResponse(w, http.StatusMethodNotAllowed, []string{
+			http.StatusText(http.StatusMethodNotAllowed),
+		})
+		return false
+	}
+	return true
 }
