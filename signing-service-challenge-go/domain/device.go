@@ -1,39 +1,9 @@
-// package domain
-
-// //import "github.com/google/uuid"
-// import (
-// 	base64 "encoding/base64"
-
-// 	"fmt"
-
-// 	uuid "github.com/google/uuid"
-// )
-
-// //signature device domain model ...
-// type device struct {
-// 	id                  uuid.UUID
-// 	label               string
-// 	signature_counter   int
-// 	privateKeyBytes     []byte
-// 	publicKeyBytes      []byte
-// 	last_signature      string
-// 	signature_algorithm SignatureAlgorithm
-// }
-
-// func New(id uuid.UUID, algorithm SignatureAlgorithm, label string) device {
-// 	s := base64.RawURLEncoding.EncodeToString([]byte(id[:]))
-// 	d := device{id, label, 0, nil, nil, s, algorithm}
-// 	return d
-// }
-
-//	func (d device) Sign(data_to_sign string) string {
-//		s := fmt.Sprint(d.signature_counter, data_to_sign, d.last_signature)
-//		return s
-//	}
 package domain
 
 import (
+	"encoding/base64"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -42,9 +12,10 @@ type SignatureDevice struct {
 	ID               uuid.UUID
 	Label            string
 	KeyPairAlgorithm CryptoAlgorithm
-	SignatureCounter int
+	signatureCounter int
 	PublicKey        string
-	PrivateKey       string
+	privateKey       string
+	last_signature   string
 }
 
 func NewSignatureDevice(id, label, algorithm, publicKey, privateKey string) (*SignatureDevice, error) {
@@ -61,21 +32,42 @@ func NewSignatureDevice(id, label, algorithm, publicKey, privateKey string) (*Si
 	if err != nil {
 		return nil, errors.New("invalid algorithm")
 	}
+	lastsignature := base64Encode(deviceid.String())
 	return &SignatureDevice{
 		ID:               deviceid,
 		Label:            label,
 		KeyPairAlgorithm: CryptoAlgorithm,
-		SignatureCounter: 0,
+		signatureCounter: 0,
 		PublicKey:        publicKey,
-		PrivateKey:       privateKey,
+		privateKey:       privateKey,
+		last_signature:   lastsignature,
 	}, nil
 }
 
-func (s *SignatureDevice) IncrementSignatureCounter() {
-	s.SignatureCounter++
+func (s *SignatureDevice) incrementSignatureCounter() {
+	s.signatureCounter++
 }
+func (s *SignatureDevice) updateLastSignature(lastsign string) {
+	s.last_signature = lastsign
+}
+func (s *SignatureDevice) formatDataToSign(data_to_sign string) (signeddata string) {
 
-// func (d *SignatureDevice) Sign(data_to_sign string) string {
-// 	s := fmt.Sprint(d.SignatureCounter, data_to_sign, d.last_signature)
-// 	return s
-// }
+	sdata := fmt.Sprint(s.signatureCounter, data_to_sign, s.last_signature)
+	return sdata
+}
+func base64Encode(data string) string {
+	return base64.StdEncoding.EncodeToString([]byte(data))
+}
+func (d *SignatureDevice) Sign(data_to_sign string, signer Signer) (*SignTransaction, error) {
+	data_to_sign = d.formatDataToSign(data_to_sign)
+	signeddata, err := signer.Sign(d.privateKey, data_to_sign)
+	if err != nil {
+		return nil, errors.New("signature failure")
+	}
+	d.incrementSignatureCounter()
+	signenc := base64Encode(signeddata)
+	d.updateLastSignature(signenc)
+	sign, err := NewSignTransaction(d.ID.String(), data_to_sign, signenc)
+
+	return sign, err
+}

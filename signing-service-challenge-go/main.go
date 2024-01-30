@@ -21,8 +21,9 @@ func main() {
 	// Initialize repository
 	var repository = persistence.NewInMemorySignatureDeviceRepository()
 	keyPairFactory := crypto.NewKeyPairFactoryImpl()
+	signerFactory := crypto.NewSignerFactoryImpl()
 	// Initialize service layer
-	service := application.NewSignatureDeviceService(repository, keyPairFactory)
+	service := application.NewSignatureDeviceService(repository, keyPairFactory, signerFactory)
 	//api handler
 	apihandler := api.NewDeviceHTTPHandler(*service)
 	server := api.NewServer(ListenAddress)

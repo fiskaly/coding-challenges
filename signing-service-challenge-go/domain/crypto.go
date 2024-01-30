@@ -35,3 +35,11 @@ type KeyPairFactory interface {
 type KeyPairGenerator interface {
 	GenerateKeyPair() (publicKey string, privateKey string, err error)
 }
+
+type SignerFactory interface {
+	CreateSigner(algorithm CryptoAlgorithm) Signer
+}
+
+type Signer interface {
+	Sign(privateKey string, data string) (signeddata string, err error)
+}
