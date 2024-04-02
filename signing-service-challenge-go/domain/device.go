@@ -1,11 +1,10 @@
 package domain
 
 import (
-	"crypto"
+	"encoding/base64"
 	"time"
 
-	"github.com/fiskaly/coding-challenges/signing-service-challenge/crypto/generator"
-	"github.com/fiskaly/coding-challenges/signing-service-challenge/crypto/signer"
+	c "github.com/fiskaly/coding-challenges/signing-service-challenge/crypto"
 	"github.com/google/uuid"
 )
 
@@ -41,18 +40,26 @@ type SignatureDevice struct {
 	ID               string
 	Algorithm        string
 	Label            string
-	KeyPair          crypto.PrivateKey
-	SignatureCounter int64
+	PrivateKey       []byte
+	PublicKey        []byte
+	SignatureCounter int
+	LastSignature    string
 	CreatedAt        time.Time
 }
 
 func NewSignatureDevice(id string, algorithm string, label string) (*SignatureDevice, error) {
-	gen, err := generator.GetGenerator(algorithm)
+	// gen, err := generator.GetGenerator(algorithm)
+	toolkit, err := c.GetToolkit(algorithm)
 	if err != nil {
 		return nil, err
 	}
 
-	keyPair, err := gen.Generate()
+	keyPair, err := toolkit.Generate()
+	if err != nil {
+		return nil, err
+	}
+
+	privateKey, publicKey, err := toolkit.Marshal(*keyPair)
 	if err != nil {
 		return nil, err
 	}
@@ -61,20 +68,29 @@ func NewSignatureDevice(id string, algorithm string, label string) (*SignatureDe
 		ID:               id,
 		Algorithm:        algorithm,
 		Label:            label,
-		KeyPair:          keyPair,
+		PrivateKey:       privateKey,
+		PublicKey:        publicKey,
 		SignatureCounter: 0,
+		LastSignature:    base64.StdEncoding.EncodeToString([]byte(id)),
 		CreatedAt:        time.Now(),
 	}, nil
 }
 
 func (sg *SignatureDevice) SignTransaction(data string) (*Transaction, error) {
 
-	signer, err := signer.GetSigner(sg.Algorithm)
+	// signer, err := signer.GetSigner(sg.Algorithm)
+	toolKit, err := c.GetToolkit(sg.Algorithm)
+
 	if err != nil {
 		return nil, err
 	}
 
-	signature, err := signer.Sign([]byte(data))
+	keyPair, err := toolKit.Unmarshal(sg.PrivateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	signature, err := toolKit.Sign(keyPair.Private, []byte(data))
 	if err != nil {
 		return nil, err
 	}

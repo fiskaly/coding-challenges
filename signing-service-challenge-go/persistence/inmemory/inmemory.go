@@ -37,7 +37,7 @@ func (ms *InMemoryStore) AddSignatureDevice(device *domain.SignatureDevice) erro
 	return nil
 }
 
-// // AddTransaction stores a new Transaction.
+// AddTransaction stores a new Transaction.
 func (ms *InMemoryStore) AddTransaction(transaction *domain.Transaction) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
@@ -76,15 +76,15 @@ func (ms *InMemoryStore) GetSignatureDevice(deviceID string) (*domain.SignatureD
 // }
 
 // IncrementSignatureCounter increments the signature counter for a given device ID.
-func (ms *InMemoryStore) IncrementSignatureCounter(deviceID string) error {
+func (ms *InMemoryStore) IncrementSignatureCounter(deviceID string) (int, error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 
 	device, exists := ms.Devices[deviceID]
 	if !exists {
-		return fmt.Errorf("signature device with ID %s not found", deviceID)
+		return 0, fmt.Errorf("signature with device ID %s not found", deviceID)
 	}
 
 	device.SignatureCounter++
-	return nil
+	return device.SignatureCounter, nil
 }

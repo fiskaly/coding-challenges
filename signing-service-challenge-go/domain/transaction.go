@@ -10,3 +10,8 @@ type Transaction struct {
 	Signature []byte
 	Timestamp time.Time
 }
+
+type Signature struct {
+	Signature  string `json:"signature"`
+	SignedData string `json:"signed_data"`
+}

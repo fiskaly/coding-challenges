@@ -6,5 +6,5 @@ type Repository interface {
 	AddSignatureDevice(device *domain.SignatureDevice) error
 	GetSignatureDevice(deviceID string) (*domain.SignatureDevice, error)
 	AddTransaction(transaction *domain.Transaction)
-	IncrementSignatureCounter(deviceID string) error
+	IncrementSignatureCounter(deviceID string) (int, error)
 }

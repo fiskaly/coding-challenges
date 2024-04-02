@@ -1,6 +1,10 @@
 package service
 
 import (
+	"encoding/base64"
+	"fmt"
+	"strconv"
+
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/domain"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/persistence"
 )
@@ -27,19 +31,23 @@ func (s *SignatureDeviceService) CreateSignatureDevice(id string, algorithm stri
 	return device, nil
 }
 
-func (s *SignatureDeviceService) SignTransaction(deviceId string, data string) (*domain.Transaction, error) {
-	// Using a real db all these operations would be executed
-	// in a transaction in order to maintain data integrity
+func (s *SignatureDeviceService) SignTransaction(deviceId string, data string) (*domain.Signature, error) {
 	device, err := s.store.GetSignatureDevice(deviceId)
 	if err != nil {
 		return nil, err
 	}
 
+	// construct data
+	dataToBeSigned := fmt.Sprintf("%s_%s_%s", strconv.Itoa(device.SignatureCounter), data, device.LastSignature)
+
 	// signe transaction
-	transaction, err := device.SignTransaction(data)
+	transaction, err := device.SignTransaction(dataToBeSigned)
 	if err != nil {
 		return nil, err
 	}
+
+	// update last signature
+	device.LastSignature = string(transaction.Signature)
 
 	// update the signatureCounter
 	s.store.IncrementSignatureCounter(deviceId)
@@ -47,5 +55,8 @@ func (s *SignatureDeviceService) SignTransaction(deviceId string, data string) (
 	// store transaction
 	s.store.AddTransaction(transaction)
 
-	return transaction, nil
+	return &domain.Signature{
+		Signature:  base64.StdEncoding.EncodeToString(transaction.Signature),
+		SignedData: dataToBeSigned,
+	}, nil
 }
