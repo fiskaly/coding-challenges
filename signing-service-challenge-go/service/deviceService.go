@@ -1,7 +1,6 @@
 package service
 
 import (
-	"encoding/base64"
 	"fmt"
 	"strconv"
 
@@ -46,17 +45,55 @@ func (s *SignatureDeviceService) SignTransaction(deviceId string, data string) (
 		return nil, err
 	}
 
-	// update last signature
-	device.LastSignature = string(transaction.Signature)
-
-	// update the signatureCounter
-	s.store.IncrementSignatureCounter(deviceId)
+	// update last signature & increment signature counter
+	err = s.store.UpdateSignatureDevice(deviceId, transaction.Signature)
+	if err != nil {
+		return nil, err
+	}
 
 	// store transaction
 	s.store.AddTransaction(transaction)
 
 	return &domain.Signature{
-		Signature:  base64.StdEncoding.EncodeToString(transaction.Signature),
+		Signature:  transaction.Signature,
 		SignedData: dataToBeSigned,
+	}, nil
+}
+
+func (s *SignatureDeviceService) GetSignatureDeviceByID(deviceId string) (*domain.SignatureDevice, error) {
+	device, err := s.store.GetSignatureDevice(deviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	return device, nil
+}
+
+func (s *SignatureDeviceService) GetTransactionsByDeviceID(deviceId string) (*domain.TransactionsByDeviceResp, error) {
+	device, err := s.GetSignatureDeviceByID(deviceId)
+	if err != nil {
+		return nil, err
+	}
+
+	transactions, err := s.store.GetTransactionsByDeviceID(device.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	transactionResp := make([]*domain.TransactionResp, 0)
+	for _, tr := range transactions {
+		transactionResp = append(transactionResp, &domain.TransactionResp{
+			ID:        tr.ID,
+			Signature: tr.Signature,
+			CreatedAt: tr.Timestamp,
+		})
+	}
+
+	return &domain.TransactionsByDeviceResp{
+		ID:           device.ID,
+		Algorithm:    device.Algorithm,
+		Label:        device.Label,
+		CreatedAt:    device.CreatedAt,
+		Transactions: transactionResp,
 	}, nil
 }

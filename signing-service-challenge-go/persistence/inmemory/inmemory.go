@@ -8,7 +8,6 @@ import (
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/domain"
 )
 
-// TODO: in-memory persistence ...
 type InMemoryStore struct {
 	Devices      map[string]*domain.SignatureDevice
 	Transactions map[string][]*domain.Transaction
@@ -51,40 +50,36 @@ func (ms *InMemoryStore) GetSignatureDevice(deviceID string) (*domain.SignatureD
 
 	sigDevice, exists := ms.Devices[deviceID]
 	if !exists {
-		return nil, fmt.Errorf("no device found with the id: %s", deviceID)
+		return nil, fmt.Errorf("no device found with id: %s", deviceID)
 	}
 
 	return sigDevice, nil
 }
 
-// // GetDevice retrieves a SignatureDevice by ID.
-// func (store *InMemoryStore) GetDevice(id string) (*domain.SignatureDevice, bool) {
-// 	store.mu.RLock()
-// 	defer store.mu.RUnlock()
-
-// 	device, exists := store.Devices[id]
-// 	return device, exists
-// }
-
-// // GetTransaction retrieves a Transaction by ID.
-// func (store *InMemoryStore) GetTransaction(id string) (*domain.Transaction, bool) {
-// 	store.mu.RLock()
-// 	defer store.mu.RUnlock()
-
-// 	transaction, exists := store.Transactions[id]
-// 	return transaction, exists
-// }
-
 // IncrementSignatureCounter increments the signature counter for a given device ID.
-func (ms *InMemoryStore) IncrementSignatureCounter(deviceID string) (int, error) {
+func (ms *InMemoryStore) GetTransactionsByDeviceID(deviceID string) ([]*domain.Transaction, error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+
+	transactions, exists := ms.Transactions[deviceID]
+	if !exists {
+		return nil, fmt.Errorf("no transactions found for device ID %s", deviceID)
+	}
+
+	return transactions, nil
+}
+
+func (ms *InMemoryStore) UpdateSignatureDevice(deviceID string, signature string) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 
 	device, exists := ms.Devices[deviceID]
 	if !exists {
-		return 0, fmt.Errorf("signature with device ID %s not found", deviceID)
+		return fmt.Errorf("device with ID %s not found", deviceID)
 	}
 
+	device.LastSignature = signature
 	device.SignatureCounter++
-	return device.SignatureCounter, nil
+
+	return nil
 }
