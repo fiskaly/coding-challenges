@@ -1,0 +1,87 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "fiscaly_challenge",
+    "dateExported": "2024-04-03T03:12:09.999Z",
+    "version": "1.1",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "8d9a4aa2-e816-4de9-b8a0-82c9bbf66dfc",
+            "colId": "55e89a19-8859-4107-bba3-7d727307ae81",
+            "containerId": "",
+            "name": "Create Signature Device",
+            "url": "localhost:8080/api/v0/createdevice",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2024-04-03T01:03:11.258Z",
+            "modified": "2024-04-03T03:10:53.112Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"id\": \"1\",\n  \"algorithm\": \"ECC\",\n  \"label\": \"device-1\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "742b7e3e-03c0-4e53-837a-4033dd668771",
+            "colId": "55e89a19-8859-4107-bba3-7d727307ae81",
+            "containerId": "",
+            "name": "Sign Transaction",
+            "url": "localhost:8080/api/v0/signTransaction",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2024-04-03T01:03:19.780Z",
+            "modified": "2024-04-03T03:10:59.894Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"deviceId\": \"1\",\n  \"data\": \"test data\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "332890b3-705a-43cc-a806-833aad5db1c0",
+            "colId": "55e89a19-8859-4107-bba3-7d727307ae81",
+            "containerId": "",
+            "name": "Get device",
+            "url": "localhost:8080/api/v0/devices?id=1",
+            "method": "GET",
+            "sortNum": 30000,
+            "created": "2024-04-03T01:03:26.768Z",
+            "modified": "2024-04-03T02:09:11.356Z",
+            "headers": [],
+            "params": [
+                {
+                    "name": "id",
+                    "value": "1",
+                    "isPath": false
+                }
+            ],
+            "tests": []
+        },
+        {
+            "_id": "5b46b510-3f30-481f-aef4-82afebe8317d",
+            "colId": "55e89a19-8859-4107-bba3-7d727307ae81",
+            "containerId": "",
+            "name": "Get Transactions By Device ID",
+            "url": "localhost:8080/api/v0/transactions?deviceId=1",
+            "method": "GET",
+            "sortNum": 50000,
+            "created": "2024-04-03T01:04:48.782Z",
+            "modified": "2024-04-03T03:11:47.124Z",
+            "headers": [],
+            "params": [
+                {
+                    "name": "deviceId",
+                    "value": "1",
+                    "isPath": false
+                }
+            ],
+            "tests": []
+        }
+    ]
+}
