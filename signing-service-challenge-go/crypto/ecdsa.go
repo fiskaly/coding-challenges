@@ -28,7 +28,7 @@ func (m ECCMarshaler) Encode(keyPair ECCKeyPair) ([]byte, []byte, error) {
 		return nil, nil, err
 	}
 
-	publicKeyBytes, err := x509.MarshalPKIXPublicKey(&keyPair.Public)
+	publicKeyBytes, err := x509.MarshalPKIXPublicKey(keyPair.Public)
 	if err != nil {
 		return nil, nil, err
 	}
