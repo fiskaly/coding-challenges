@@ -3,6 +3,8 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 // Response is the generic API response container.
@@ -17,26 +19,38 @@ type ErrorResponse struct {
 
 // Server manages HTTP requests and dispatches them to the appropriate services.
 type Server struct {
-	listenAddress string
+	listenAddress      string
+	deviceHandler      *DeviceHandler
+	transactionHandler *TransactionHandler
 }
 
 // NewServer is a factory to instantiate a new Server.
-func NewServer(listenAddress string) *Server {
+func NewServer(listenAddress string, deviceServiceHanlder *DeviceHandler, transactionHandler *TransactionHandler) *Server {
+
 	return &Server{
-		listenAddress: listenAddress,
+		listenAddress:      listenAddress,
+		transactionHandler: transactionHandler,
+		deviceHandler:      deviceServiceHanlder,
 		// TODO: add services / further dependencies here ...
 	}
 }
 
 // Run registers all HandlerFuncs for the existing HTTP routes and starts the Server.
 func (s *Server) Run() error {
-	mux := http.NewServeMux()
+	router := mux.NewRouter()
 
-	mux.Handle("/api/v0/health", http.HandlerFunc(s.Health))
+	router.Handle("/api/v0/health", http.HandlerFunc(s.Health)).Methods("GET")
 
 	// TODO: register further HandlerFuncs here ...
+	//Device Handler
+	router.Handle("/api/v0/devices/create-device", http.HandlerFunc(s.deviceHandler.CreateSignatureDevice)).Methods("POST")
+	router.Handle("/api/v0/devices/list-devices", http.HandlerFunc(s.deviceHandler.ListDevices)).Methods("GET")
+	router.Handle("/api/v0/devices/{deviceId}", http.HandlerFunc(s.deviceHandler.GetDeviceById)).Methods("GET")
 
-	return http.ListenAndServe(s.listenAddress, mux)
+	//Transaction Handler
+	router.Handle("/api/v0/transactions/{deviceId}/sign", http.HandlerFunc(s.transactionHandler.SignTransactionHandler)).Methods("POST")
+
+	return http.ListenAndServe(s.listenAddress, router)
 }
 
 // WriteInternalError writes a default internal error message as an HTTP response.
