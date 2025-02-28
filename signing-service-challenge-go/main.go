@@ -8,11 +8,13 @@ import (
 
 const (
 	ListenAddress = ":8080"
-	// TODO: add further configuration parameters here ...
+	ReadTimeout   = 5
+	WriteTimeout  = 10
+	IdleTimeout   = 120
 )
 
 func main() {
-	server := api.NewServer(ListenAddress)
+	server := api.NewServer(ListenAddress, ReadTimeout, WriteTimeout, IdleTimeout)
 
 	if err := server.Run(); err != nil {
 		log.Fatal("Could not start server on ", ListenAddress)

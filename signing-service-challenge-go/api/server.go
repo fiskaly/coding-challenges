@@ -3,6 +3,9 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"time"
+
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/persistence"
 )
 
 // Response is the generic API response container.
@@ -18,13 +21,21 @@ type ErrorResponse struct {
 // Server manages HTTP requests and dispatches them to the appropriate services.
 type Server struct {
 	listenAddress string
+	store         persistence.Storage
+	readTimeout   time.Duration
+	writeTimeout  time.Duration
+	idleTimeout   time.Duration
 }
 
 // NewServer is a factory to instantiate a new Server.
-func NewServer(listenAddress string) *Server {
+func NewServer(listenAddress string, readTimeout, writeTimeout, idleTimeout time.Duration) *Server {
+	store := persistence.NewInMemoryStore()
 	return &Server{
 		listenAddress: listenAddress,
-		// TODO: add services / further dependencies here ...
+		store:         store,
+		readTimeout:   readTimeout,
+		writeTimeout:  writeTimeout,
+		idleTimeout:   idleTimeout,
 	}
 }
 
@@ -34,9 +45,17 @@ func (s *Server) Run() error {
 
 	mux.Handle("/api/v0/health", http.HandlerFunc(s.Health))
 
-	// TODO: register further HandlerFuncs here ...
+	deviceHandler := NewDeviceHandler(s.store)
+	deviceHandler.RegisterRoutes(mux)
 
-	return http.ListenAndServe(s.listenAddress, mux)
+	server := &http.Server{
+		Addr:         s.listenAddress,
+		Handler:      mux,
+		ReadTimeout:  s.readTimeout,
+		WriteTimeout: s.writeTimeout,
+		IdleTimeout:  s.idleTimeout,
+	}
+	return server.ListenAndServe()
 }
 
 // WriteInternalError writes a default internal error message as an HTTP response.
