@@ -5,7 +5,10 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/rsa"
+	"fmt"
 )
+
+var ErrUnsupportedAlgorithm = fmt.Errorf("unsupported algorithm")
 
 // RSAGenerator generates a RSA key pair.
 type RSAGenerator struct{}
@@ -39,4 +42,28 @@ func (g *ECCGenerator) Generate() (*ECCKeyPair, error) {
 		Public:  &key.PublicKey,
 		Private: key,
 	}, nil
+}
+
+func GenerateAndEncode(algorithm string) ([]byte, []byte, error) {
+	switch algorithm {
+	case "RSA":
+		generator := &RSAGenerator{}
+		keyPair, err := generator.Generate()
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to generate RSA key pair: %w", err)
+		}
+		marshaler := NewRSAMarshaler()
+		return marshaler.Marshal(*keyPair)
+	case "ECC":
+		generator := &ECCGenerator{}
+		keyPair, err := generator.Generate()
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to generate ECC key pair: %w", err)
+		}
+		marshaler := NewECCMarshaler()
+		return marshaler.Encode(*keyPair)
+
+	default:
+		return nil, nil, ErrUnsupportedAlgorithm
+	}
 }
