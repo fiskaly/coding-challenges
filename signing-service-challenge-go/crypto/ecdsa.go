@@ -4,6 +4,9 @@ import (
 	"crypto/ecdsa"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // ECCKeyPair is a DTO that holds ECC private and public keys.
@@ -16,8 +19,8 @@ type ECCKeyPair struct {
 type ECCMarshaler struct{}
 
 // NewECCMarshaler creates a new ECCMarshaler.
-func NewECCMarshaler() ECCMarshaler {
-	return ECCMarshaler{}
+func NewECCMarshaler() *ECCMarshaler {
+	return &ECCMarshaler{}
 }
 
 // Encode takes an ECCKeyPair and encodes it to be written on disk.
@@ -25,11 +28,15 @@ func NewECCMarshaler() ECCMarshaler {
 func (m ECCMarshaler) Encode(keyPair ECCKeyPair) ([]byte, []byte, error) {
 	privateKeyBytes, err := x509.MarshalECPrivateKey(keyPair.Private)
 	if err != nil {
+		err := fmt.Errorf("error with Marshaling the private key: %s", err)
+		log.Error(err.Error())
 		return nil, nil, err
 	}
 
 	publicKeyBytes, err := x509.MarshalPKIXPublicKey(keyPair.Public)
 	if err != nil {
+		err := fmt.Errorf("error with Marshaling the public key: %s", err)
+		log.Error(err.Error())
 		return nil, nil, err
 	}
 
@@ -43,6 +50,8 @@ func (m ECCMarshaler) Encode(keyPair ECCKeyPair) ([]byte, []byte, error) {
 		Bytes: publicKeyBytes,
 	})
 
+	log.Debug("ECC key pairs succesfully encoded")
+
 	return encodedPublic, encodedPrivate, nil
 }
 
@@ -51,8 +60,12 @@ func (m ECCMarshaler) Decode(privateKeyBytes []byte) (*ECCKeyPair, error) {
 	block, _ := pem.Decode(privateKeyBytes)
 	privateKey, err := x509.ParseECPrivateKey(block.Bytes)
 	if err != nil {
+		err := fmt.Errorf("error while parsing the private key: %s", err)
+		log.Error(err.Error())
 		return nil, err
 	}
+
+	log.Debug("ECC key pairs succesfully decoded")
 
 	return &ECCKeyPair{
 		Private: privateKey,
