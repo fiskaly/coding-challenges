@@ -4,6 +4,9 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // RSAKeyPair is a DTO that holds RSA private and public keys.
@@ -16,8 +19,8 @@ type RSAKeyPair struct {
 type RSAMarshaler struct{}
 
 // NewRSAMarshaler creates a new RSAMarshaler.
-func NewRSAMarshaler() RSAMarshaler {
-	return RSAMarshaler{}
+func NewRSAMarshaler() *RSAMarshaler {
+	return &RSAMarshaler{}
 }
 
 // Marshal takes an RSAKeyPair and encodes it to be written on disk.
@@ -36,6 +39,8 @@ func (m *RSAMarshaler) Marshal(keyPair RSAKeyPair) ([]byte, []byte, error) {
 		Bytes: publicKeyBytes,
 	})
 
+	log.Debug("RSA key pairs succesfully marshaled")
+
 	return encodePublic, encodedPrivate, nil
 }
 
@@ -44,8 +49,12 @@ func (m *RSAMarshaler) Unmarshal(privateKeyBytes []byte) (*RSAKeyPair, error) {
 	block, _ := pem.Decode(privateKeyBytes)
 	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
+		err := fmt.Errorf("error while unmarshaling the RSA key pair: %s", err)
+		log.Error(err.Error())
 		return nil, err
 	}
+
+	log.Debug("RSA key pairs succesfully unmarshaled")
 
 	return &RSAKeyPair{
 		Private: privateKey,
