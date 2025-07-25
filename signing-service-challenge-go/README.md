@@ -79,6 +79,10 @@ As we are in the business of compliance technology, we need to make sure that ou
 - The system currently only supports `RSA` and `ECDSA` as signature algorithms. Try to design the signing mechanism in a way that allows easy extension to other algorithms without changing the core domain logic.
 - For now it is enough to store signature devices in memory. Efficiency is not a priority for this. In the future we might want to scale out. As you design your storage logic, keep in mind that we may later want to switch to a relational database.
 
+#### AI Tools
+
+The use of AI tools to aid completing the challenge is permitted, but you need to be able to reason about the design and implementation choices made during the interview. Furthermore, if you used any AI tools, you need to clearly state which tools were used for different parts of the challenge when submitting it.
+
 #### Credits
 
 This challenge is heavily influenced by the regulations for `KassenSichV` (Germany) as well as the `RKSV` (Austria) and our solutions for them.
