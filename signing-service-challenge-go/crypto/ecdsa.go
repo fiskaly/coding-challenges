@@ -6,6 +6,10 @@ import (
 	"encoding/pem"
 )
 
+type ECCMarshaler interface {
+	Encode(keyPair ECCKeyPair) ([]byte, []byte, error)
+}
+
 // ECCKeyPair is a DTO that holds ECC private and public keys.
 type ECCKeyPair struct {
 	Public  *ecdsa.PublicKey
@@ -13,16 +17,11 @@ type ECCKeyPair struct {
 }
 
 // ECCMarshaler can encode and decode an ECC key pair.
-type ECCMarshaler struct{}
-
-// NewECCMarshaler creates a new ECCMarshaler.
-func NewECCMarshaler() ECCMarshaler {
-	return ECCMarshaler{}
-}
+type DefaultECCMarshaler struct{}
 
 // Encode takes an ECCKeyPair and encodes it to be written on disk.
 // It returns the public and the private key as a byte slice.
-func (m ECCMarshaler) Encode(keyPair ECCKeyPair) ([]byte, []byte, error) {
+func (m DefaultECCMarshaler) Encode(keyPair ECCKeyPair) ([]byte, []byte, error) {
 	privateKeyBytes, err := x509.MarshalECPrivateKey(keyPair.Private)
 	if err != nil {
 		return nil, nil, err
@@ -47,7 +46,7 @@ func (m ECCMarshaler) Encode(keyPair ECCKeyPair) ([]byte, []byte, error) {
 }
 
 // Decode assembles an ECCKeyPair from an encoded private key.
-func (m ECCMarshaler) Decode(privateKeyBytes []byte) (*ECCKeyPair, error) {
+func (m DefaultECCMarshaler) Decode(privateKeyBytes []byte) (*ECCKeyPair, error) {
 	block, _ := pem.Decode(privateKeyBytes)
 	privateKey, err := x509.ParseECPrivateKey(block.Bytes)
 	if err != nil {
