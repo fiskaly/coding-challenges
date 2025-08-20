@@ -53,4 +53,4 @@ Write an **Ansible playbook** that does the following:
 
 ### AI Tool Disclaimer
 
-The use of AI tools to aid completing the challenge is permitted, but you need to be able to reason about the design and implementation choices made during the interview. Furthermore, if you used any AI tools, you need to clearly state which tools were used for different parts of the challenge when submitting it - and be able to explain why.
+The use of AI tools to aid completing the challenge is permitted, but you need to be able to reason about the design and implementation choices made during your interview. Furthermore, if you used any AI tools, you need to clearly state which tools were used for different parts of the challenge when submitting it - and be able to explain why. Ensure that you document this inside the `README` for your repository, so that it is visible to the reviewers.
