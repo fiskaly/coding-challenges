@@ -1,0 +1,81 @@
+---
+- hosts: aws_ec2
+  gather_facts: true
+  tasks: 
+  - name: Update repos/packages
+    become: true
+    block:
+      - name: Update apt cache (Ubuntu/Debian)
+        ansible.builtin.apt:
+          update_cache: true
+          cache_valid_time: 3600
+        when: ansible_os_family == "Debian"
+      - name: Upgrade all packages (Ubuntu/Debian)
+        ansible.builtin.apt:
+          upgrade: true
+          autoclean: true
+        when: ansible_os_family == "Debian"
+        register: apt_upgrade_result
+      - name: Update yum cache (CentOS/RHEL)
+        ansible.builtin.dnf:
+          update_cache: true
+        when: ansible_os_family == "RedHat"
+      - name: Upgrade all packages (CentOS/RHEL)
+        ansible.builtin.dnf:
+          name: "*"
+          state: latest
+        when: ansible_os_family == "RedHat"
+        register: yum_upgrade_result
+      - name: Display upgrade results
+        debug:
+          msg: "{{ apt_upgrade_result.stdout_lines if ansible_os_family == 'Debian' else yum_upgrade_result.results }}"
+  - name: Install Apache on Ubuntu hosts
+    become: true
+    block:
+      - name: Install Apache
+        ansible.builtin.apt:
+          name: apache2
+          state: present
+    when: ansible_os_family == "Debian"
+  - name: Remove Apache on RedHat hosts
+    become: true
+    block:
+      - name: Remove Apache
+        ansible.builtin.dnf:
+          name: httpd
+          state: absent
+    when: ansible_os_family == "RedHat"
+  - name: Configure Apache if installed on Ubuntu
+    become: true
+    block:
+      - name: Gather package facts
+        package_facts:
+          manager: auto
+      - block:
+        - name: Copy index.html
+          ansible.builtin.copy:
+            src: files/index.html
+            dest: /var/www/html/index.html
+            mode: '0644'
+        - name: Restart service apache2, in all cases
+          ansible.builtin.service:
+            name: apache2
+            state: restarted
+        when: "'apache2' in ansible_facts.packages"
+    when: ansible_os_family == "Debian"
+  - name: Install MariaDB on RHELs
+    become: true
+    block:
+      - name: Install MariaDB
+        ansible.builtin.dnf:
+          name: mariadb
+          state: present
+    when: ansible_os_family == "RedHat"
+  - name: Uninstall MariaDB on Debian
+    become: true
+    block:
+      - name: Uninstall MariaDB
+        apt:
+          name: mariadb-server
+          state: absent
+    when: ansible_os_family == "Debian"

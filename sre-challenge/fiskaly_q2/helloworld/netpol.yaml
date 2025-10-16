@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: helloworld-netpol
+spec:
+  podSelector:
+    matchLabels:
+      app: helloworld
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: nginx
+    - namespaceSelector:
+        matchLabels:
+          name: fiskaly-q2
+    ports:
+    - protocol: TCP
+      port: 8080
