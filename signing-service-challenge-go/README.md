@@ -86,3 +86,25 @@ The use of AI tools to aid completing the challenge is permitted, but you will n
 ### Credits
 
 This challenge is heavily influenced by the regulations for `KassenSichV` (Germany) as well as the `RKSV` (Austria) and our solutions for them.
+
+## Solution Architecture & Testing
+
+- **Architecture:** The service is separated into distinct packages: `domain` for core models and invariants (`SignatureDevice`), `crypto` for signer implementations, `persistence` for storage abstractions with an in-memory repository, `service` for orchestration and locking, and `api` for HTTP handlers built on `net/http`. The HTTP layer wires through `main.go`, instantiating repositories, services, and handlers.
+- **Test Strategy:** Unit tests exercise domain behaviour (secured payload formatting, state updates), crypto signing/verification, repository cloning and concurrency, service orchestration including concurrent signing (with monotonic counter and signature-chain assertions), and handler responses using `httptest`. `go test ./...` acts as the main verification command.
+- **Manual QA:** `docs/curl-guide.md` lists ready-to-run cURL commands for end-to-end demos covering success paths and error scenarios.
+- **AI Assistance:** ChatGPT (OpenAI) was used to draft initial domain structs/methods, implement crypto signers, design the in-memory repository, build the signature service, and scaffold HTTP handlers/tests. All generated code was reviewed, adapted, and validated locally.
+
+## Local Tooling & Caches
+
+`Makefile` provides two convenience targets:
+
+- `make run` – starts the HTTP server on `:8080`
+- `make test` – runs the full unit test suite (`go test ./...`)
+
+Both targets set `GOCACHE=$(pwd)/.cache` and `GOMODCACHE=$(pwd)/.gomodcache` so Go’s build and module caches stay inside the repository root. The extra state folders are ignored via `.gitignore`:
+
+- `.cache` – Go build cache (compiled packages, test binaries)
+- `.gocache` – IDE/editor cache (left for completeness)
+- `.gomodcache` – downloaded Go module cache
+
+If you want to reclaim disk space, run `make clean-cache` to remove the local caches. The next `make run` or `make test` will recreate them automatically.

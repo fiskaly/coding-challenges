@@ -1,0 +1,965 @@
+{
+	"info": {
+		"_postman_id": "0c411c9a-3aad-414d-8298-6f3cf823900e",
+		"name": "Signature Service API",
+		"description": "Postman collection covering the core flows for the signature service challenge.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27643750",
+		"_collection_link": "https://dev111-5544.postman.co/workspace/Solaire~fd65cb09-2f8c-46c5-b6b5-f759662574c1/collection/27643750-0c411c9a-3aad-414d-8298-6f3cf823900e?action=share&source=collection_link&creator=27643750"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"status is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"content-type is application/json\", function () {\r",
+							"    const contentType = pm.response.headers.get(\"Content-Type\");\r",
+							"    pm.expect(contentType, \"Content-Type header present\").to.exist;\r",
+							"    pm.expect(contentType.toLowerCase()).to.include(\"application/json\");\r",
+							"});\r",
+							"\r",
+							"const payload = pm.response.json();\r",
+							"\r",
+							"pm.test(\"response wraps data object\", function () {\r",
+							"    pm.expect(payload).to.have.property(\"data\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"health status is pass\", function () {\r",
+							"    pm.expect(payload.data).to.have.property(\"status\", \"pass\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"health version is v0\", function () {\r",
+							"    pm.expect(payload.data).to.have.property(\"version\", \"v0\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v0/health",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v0",
+						"health"
+					]
+				},
+				"description": "Verify that the service is running."
+			},
+			"response": []
+		},
+		{
+			"name": "Create RSA Device",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"status is 201 Created\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"content-type is application/json\", function () {\r",
+							"    const contentType = pm.response.headers.get(\"Content-Type\");\r",
+							"    pm.expect(contentType, \"Content-Type header present\").to.exist;\r",
+							"    pm.expect(contentType.toLowerCase()).to.include(\"application/json\");\r",
+							"});\r",
+							"\r",
+							"const body = pm.response.json();\r",
+							"\r",
+							"pm.test(\"response wraps payload in data\", function () {\r",
+							"    pm.expect(body).to.have.property(\"data\");\r",
+							"});\r",
+							"\r",
+							"const payload = body.data;\r",
+							"\r",
+							"pm.test(\"device metadata returned\", function () {\r",
+							"    pm.expect(payload).to.include.keys([\r",
+							"        \"id\",\r",
+							"        \"label\",\r",
+							"        \"algorithm\",\r",
+							"        \"signature_counter\",\r",
+							"        \"last_signature\",\r",
+							"        \"public_key_pem\"\r",
+							"    ]);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"algorithm is RSA\", function () {\r",
+							"    pm.expect(payload.algorithm).to.eql(\"RSA\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"signature counter starts at 0\", function () {\r",
+							"    pm.expect(payload.signature_counter).to.eql(0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"last signature is base64(device id)\", function () {\r",
+							"    const expected = Buffer.from(payload.id).toString(\"base64\");\r",
+							"    pm.expect(payload.last_signature).to.eql(expected);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"public key PEM is present\", function () {\r",
+							"    pm.expect(payload.public_key_pem).to.be.a(\"string\").and.to.not.be.empty;\r",
+							"});\r",
+							"\r",
+							"// make the device id available for follow-up requests                                                                                                                            \r",
+							"pm.environment.set(\"device_rsa_id\", payload.id);\r",
+							"pm.environment.set(\"device_rsa_last_signature\", payload.last_signature);\r",
+							"pm.environment.set(\"device_rsa_public_key\", payload.public_key_pem); "
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"{{device_rsa_id}}\",\n    \"label\": \"POS Terminal 1\",\n    \"algorithm\": \"rsa\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v0/devices",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v0",
+						"devices"
+					]
+				},
+				"description": "Create a signature device backed by an RSA key pair. Expect HTTP 201."
+			},
+			"response": []
+		},
+		{
+			"name": "Create ECC Device",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"status is 201 Created\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"content-type is application/json\", function () {\r",
+							"    const contentType = pm.response.headers.get(\"Content-Type\");\r",
+							"    pm.expect(contentType, \"Content-Type header present\").to.exist;\r",
+							"    pm.expect(contentType.toLowerCase()).to.include(\"application/json\");\r",
+							"});\r",
+							"\r",
+							"const body = pm.response.json();\r",
+							"\r",
+							"pm.test(\"response wraps payload in data\", function () {\r",
+							"    pm.expect(body).to.have.property(\"data\");\r",
+							"});\r",
+							"\r",
+							"const payload = body.data;\r",
+							"\r",
+							"pm.test(\"device metadata returned\", function () {\r",
+							"    pm.expect(payload).to.include.keys([\r",
+							"        \"id\",\r",
+							"        \"label\",\r",
+							"        \"algorithm\",\r",
+							"        \"signature_counter\",\r",
+							"        \"last_signature\",\r",
+							"        \"public_key_pem\"\r",
+							"    ]);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"algorithm is ECC\", function () {\r",
+							"    pm.expect(payload.algorithm).to.eql(\"ECC\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"signature counter starts at 0\", function () {\r",
+							"    pm.expect(payload.signature_counter).to.eql(0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"last signature is base64(device id)\", function () {\r",
+							"    const expected = Buffer.from(payload.id).toString(\"base64\");\r",
+							"    pm.expect(payload.last_signature).to.eql(expected);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"public key PEM is present\", function () {\r",
+							"    pm.expect(payload.public_key_pem).to.be.a(\"string\").and.to.not.be.empty;\r",
+							"});                                                                                                                                         \r",
+							"pm.environment.set(\"device_ecc_id\", payload.id);\r",
+							"pm.environment.set(\"device_ecc_last_signature\", payload.last_signature);\r",
+							"pm.environment.set(\"device_ecc_public_key\", payload.public_key_pem);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"{{device_ecc_id}}\",\n    \"label\": \"POS Terminal 2\",\n    \"algorithm\": \"ecc\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v0/devices",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v0",
+						"devices"
+					]
+				},
+				"description": "Create a signature device backed by an ECDSA key pair. Expect HTTP 201."
+			},
+			"response": []
+		},
+		{
+			"name": "List Devices",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"status is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"content-type is application/json\", function () {\r",
+							"    const contentType = pm.response.headers.get(\"Content-Type\");\r",
+							"    pm.expect(contentType, \"Content-Type header present\").to.exist;\r",
+							"    pm.expect(contentType.toLowerCase()).to.include(\"application/json\");\r",
+							"});\r",
+							"\r",
+							"const body = pm.response.json();\r",
+							"\r",
+							"pm.test(\"response wraps payload in data array\", function () {\r",
+							"    pm.expect(body).to.have.property(\"data\").that.is.an(\"array\");\r",
+							"});\r",
+							"\r",
+							"const devices = body.data;\r",
+							"\r",
+							"pm.test(\"devices contain required fields\", function () {\r",
+							"    devices.forEach((device) => {\r",
+							"        pm.expect(device).to.include.keys([\r",
+							"            \"id\",\r",
+							"            \"label\",\r",
+							"            \"algorithm\",\r",
+							"            \"signature_counter\",\r",
+							"            \"last_signature\"\r",
+							"        ]);\r",
+							"\r",
+							"        pm.expect(device.id).to.be.a(\"string\").and.to.not.be.empty;\r",
+							"        pm.expect(device.algorithm).to.be.oneOf([\"RSA\", \"ECC\"]);\r",
+							"        pm.expect(device.signature_counter).to.be.a(\"number\").and.to.be.at.least(0);\r",
+							"        pm.expect(device.last_signature).to.be.a(\"string\").and.to.not.be.empty;\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"// Optional: ensure devices created earlier are present when variables are set                                                                                                    \r",
+							"const expectedDeviceIds = [\r",
+							"    pm.environment.get(\"device_rsa_id\"),\r",
+							"    pm.environment.get(\"device_ecc_id\")\r",
+							"].filter(Boolean);\r",
+							"\r",
+							"if (expectedDeviceIds.length > 0) {\r",
+							"    const returnedIds = devices.map((device) => device.id);\r",
+							"    expectedDeviceIds.forEach((expectedId) => {\r",
+							"        pm.test(`device ${expectedId} is listed`, function () {\r",
+							"            pm.expect(returnedIds).to.include(expectedId);\r",
+							"        });\r",
+							"    });\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v0/devices",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v0",
+						"devices"
+					]
+				},
+				"description": "Fetch all registered signature devices."
+			},
+			"response": []
+		},
+		{
+			"name": "Get RSA Device",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"status is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"content-type is application/json\", function () {\r",
+							"    const contentType = pm.response.headers.get(\"Content-Type\");\r",
+							"    pm.expect(contentType, \"Content-Type header present\").to.exist;\r",
+							"    pm.expect(contentType.toLowerCase()).to.include(\"application/json\");\r",
+							"});\r",
+							"\r",
+							"const body = pm.response.json();\r",
+							"\r",
+							"pm.test(\"response wraps payload in data object\", function () {\r",
+							"    pm.expect(body).to.have.property(\"data\");\r",
+							"});\r",
+							"\r",
+							"const device = body.data;\r",
+							"\r",
+							"pm.test(\"device metadata present\", function () {\r",
+							"    pm.expect(device).to.include.keys([\r",
+							"        \"id\",\r",
+							"        \"label\",\r",
+							"        \"algorithm\",\r",
+							"        \"signature_counter\",\r",
+							"        \"last_signature\"\r",
+							"    ]);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"algorithm is RSA\", function () {\r",
+							"    pm.expect(device.algorithm).to.eql(\"RSA\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"signature counter is non-negative\", function () {\r",
+							"    pm.expect(device.signature_counter).to.be.a(\"number\").and.to.be.at.least(0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"last signature populated\", function () {\r",
+							"    pm.expect(device.last_signature).to.be.a(\"string\").and.to.not.be.empty;\r",
+							"});\r",
+							"\r",
+							"// Optional: confirm it matches the device created earlier                                                                                                                        \r",
+							"const expectedId = pm.environment.get(\"device_rsa_id\");\r",
+							"if (expectedId) {\r",
+							"    pm.test(\"device id matches environment variable\", function () {\r",
+							"        pm.expect(device.id).to.eql(expectedId);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"const expectedLast = pm.environment.get(\"device_rsa_last_signature\");\r",
+							"if (expectedLast) {\r",
+							"    pm.test(\"last signature matches stored value\", function () {\r",
+							"        pm.expect(device.last_signature).to.eql(expectedLast);\r",
+							"    });\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v0/devices/{{device_rsa_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v0",
+						"devices",
+						"{{device_rsa_id}}"
+					]
+				},
+				"description": "Lookup the RSA device created earlier."
+			},
+			"response": []
+		},
+		{
+			"name": "Get ECC Device",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"status is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"content-type is application/json\", function () {\r",
+							"    const contentType = pm.response.headers.get(\"Content-Type\");\r",
+							"    pm.expect(contentType, \"Content-Type header present\").to.exist;\r",
+							"    pm.expect(contentType.toLowerCase()).to.include(\"application/json\");\r",
+							"});\r",
+							"\r",
+							"const body = pm.response.json();\r",
+							"\r",
+							"pm.test(\"response wraps payload in data object\", function () {\r",
+							"    pm.expect(body).to.have.property(\"data\");\r",
+							"});\r",
+							"\r",
+							"const device = body.data;\r",
+							"\r",
+							"pm.test(\"device metadata present\", function () {\r",
+							"    pm.expect(device).to.include.keys([\r",
+							"        \"id\",\r",
+							"        \"label\",\r",
+							"        \"algorithm\",\r",
+							"        \"signature_counter\",\r",
+							"        \"last_signature\"\r",
+							"    ]);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"algorithm is ECC\", function () {\r",
+							"    pm.expect(device.algorithm).to.eql(\"ECC\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"signature counter is non-negative\", function () {\r",
+							"    pm.expect(device.signature_counter).to.be.a(\"number\").and.to.be.at.least(0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"last signature populated\", function () {\r",
+							"    pm.expect(device.last_signature).to.be.a(\"string\").and.to.not.be.empty;\r",
+							"});\r",
+							"\r",
+							"// Optional assertions based on environment variables captured during creation                                                                                                    \r",
+							"const expectedId = pm.environment.get(\"device_ecc_id\");\r",
+							"if (expectedId) {\r",
+							"    pm.test(\"device id matches environment variable\", function () {\r",
+							"        pm.expect(device.id).to.eql(expectedId);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"const expectedLast = pm.environment.get(\"device_ecc_last_signature\");\r",
+							"if (expectedLast) {\r",
+							"    pm.test(\"last signature matches stored value\", function () {\r",
+							"        pm.expect(device.last_signature).to.eql(expectedLast);\r",
+							"    });\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/v0/devices/{{device_ecc_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v0",
+						"devices",
+						"{{device_ecc_id}}"
+					]
+				},
+				"description": "Generated from cURL: curl -X GET \"http://localhost:8080/api/v0/devices/device-ecc-001\" \\                                                                                                               \r\n    -H \"Accept: application/json\""
+			},
+			"response": []
+		},
+		{
+			"name": "Sign Transaction (RSA Device)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"status is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"content-type is application/json\", function () {\r",
+							"    const contentType = pm.response.headers.get(\"Content-Type\");\r",
+							"    pm.expect(contentType, \"Content-Type header present\").to.exist;\r",
+							"    pm.expect(contentType.toLowerCase()).to.include(\"application/json\");\r",
+							"});\r",
+							"\r",
+							"const body = pm.response.json();\r",
+							"\r",
+							"pm.test(\"response wraps payload in data object\", function () {\r",
+							"    pm.expect(body).to.have.property(\"data\");\r",
+							"});\r",
+							"\r",
+							"const res = body.data;\r",
+							"\r",
+							"pm.test(\"signature response fields present\", function () {\r",
+							"    pm.expect(res).to.include.keys([\r",
+							"        \"device_id\",\r",
+							"        \"signature\",\r",
+							"        \"signed_data\",\r",
+							"        \"signature_counter\",\r",
+							"        \"last_signature\"\r",
+							"    ]);\r",
+							"    pm.expect(res.device_id).to.be.a(\"string\").and.to.not.be.empty;\r",
+							"    pm.expect(res.signature).to.be.a(\"string\").and.to.not.be.empty;\r",
+							"    pm.expect(res.signed_data).to.be.a(\"string\").and.to.not.be.empty;\r",
+							"    pm.expect(res.signature_counter).to.be.a(\"number\");\r",
+							"    pm.expect(res.last_signature).to.be.a(\"string\").and.to.not.be.empty;\r",
+							"});\r",
+							"\r",
+							"// Split signed_data into counter, payload, last signature reference.                                                                                                             \r",
+							"const signedData = res.signed_data;\r",
+							"const lastSep = signedData.lastIndexOf(\"_\");\r",
+							"pm.test(\"signed_data carries previous signature reference\", function () {\r",
+							"    pm.expect(lastSep, \"signed_data must contain 2 underscores\").to.be.above(0);\r",
+							"});\r",
+							"\r",
+							"const payloadSection = signedData.slice(0, lastSep);\r",
+							"const embeddedLastSignature = signedData.slice(lastSep + 1);\r",
+							"const payloadSep = payloadSection.indexOf(\"_\");\r",
+							"\r",
+							"pm.test(\"signed_data embeds counter and payload\", function () {\r",
+							"    pm.expect(payloadSep, \"signed_data must include counter and payload\").to.be.above(0);\r",
+							"});\r",
+							"\r",
+							"const counterBefore = parseInt(payloadSection.slice(0, payloadSep), 10);\r",
+							"const payloadData = payloadSection.slice(payloadSep + 1);\r",
+							"\r",
+							"pm.test(\"counter in signed_data is numeric\", function () {\r",
+							"    pm.expect(counterBefore).to.satisfy(Number.isInteger);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"payload portion is not empty\", function () {\r",
+							"    pm.expect(payloadData).to.be.a(\"string\").and.to.not.be.empty;\r",
+							"});\r",
+							"\r",
+							"// Expect signature_counter == counterBefore + 1 (counter incremented after signing).                                                                                             \r",
+							"pm.test(\"signature counter increments after signing\", function () {\r",
+							"    pm.expect(res.signature_counter).to.eql(counterBefore + 1);\r",
+							"});\r",
+							"\r",
+							"// last_signature in response equals produced signature.                                                                                                                          \r",
+							"pm.test(\"last_signature matches returned signature\", function () {\r",
+							"    pm.expect(res.last_signature).to.eql(res.signature);\r",
+							"});\r",
+							"\r",
+							"// Optional: ensure chaining with previously stored state.                                                                                                                        \r",
+							"const previousCounter = Number(pm.environment.get(\"device_rsa_counter\") || 0);\r",
+							"pm.test(\"counter increases sequentially\", function () {\r",
+							"    pm.expect(res.signature_counter).to.eql(previousCounter + 1);\r",
+							"});\r",
+							"\r",
+							"const previousLast = pm.environment.get(\"device_rsa_last_signature\");\r",
+							"if (previousLast) {\r",
+							"    pm.test(\"payload references previous signature\", function () {\r",
+							"        const expected = previousLast;\r",
+							"        pm.expect(embeddedLastSignature).to.eql(expected);\r",
+							"    });\r",
+							"} else {\r",
+							"    // First signature should reference base64(device-id).                                                                                                                          \r",
+							"    const expectedInitialLast = Buffer.from(res.device_id).toString(\"base64\");\r",
+							"    pm.test(\"initial payload references base64(device id)\", function () {\r",
+							"        pm.expect(embeddedLastSignature).to.eql(expectedInitialLast);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"// Signature string looks like base64.                                                                                                                                            \r",
+							"pm.test(\"signature string looks base64-encoded\", function () {\r",
+							"    pm.expect(res.signature).to.match(/^[A-Za-z0-9+/]+={0,2}$/);\r",
+							"});\r",
+							"\r",
+							"// Store new state for subsequent signing calls.                                                                                                                                  \r",
+							"pm.environment.set(\"device_rsa_counter\", res.signature_counter);\r",
+							"pm.environment.set(\"device_rsa_last_signature\", res.last_signature);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"data\": \"receipt=42,amount=1999,currency=EUR\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v0/devices/{{device_rsa_id}}/sign",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v0",
+						"devices",
+						"{{device_rsa_id}}",
+						"sign"
+					]
+				},
+				"description": "Create a signature for a payload using the RSA device. Expect the signature counter to increment."
+			},
+			"response": []
+		},
+		{
+			"name": "Sign Transaction (ECC Device)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"status is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"content-type is application/json\", function () {\r",
+							"    const contentType = pm.response.headers.get(\"Content-Type\");\r",
+							"    pm.expect(contentType, \"Content-Type header present\").to.exist;\r",
+							"    pm.expect(contentType.toLowerCase()).to.include(\"application/json\");\r",
+							"});\r",
+							"\r",
+							"const wrapper = pm.response.json();\r",
+							"\r",
+							"pm.test(\"response wraps payload in data object\", function () {\r",
+							"    pm.expect(wrapper).to.have.property(\"data\");\r",
+							"});\r",
+							"\r",
+							"const res = wrapper.data;\r",
+							"\r",
+							"pm.test(\"signature response fields present\", function () {\r",
+							"    pm.expect(res).to.include.keys([\r",
+							"        \"device_id\",\r",
+							"        \"signature\",\r",
+							"        \"signed_data\",\r",
+							"        \"signature_counter\",\r",
+							"        \"last_signature\"\r",
+							"    ]);\r",
+							"    pm.expect(res.device_id).to.be.a(\"string\").and.to.not.be.empty;\r",
+							"    pm.expect(res.signature).to.be.a(\"string\").and.to.not.be.empty;\r",
+							"    pm.expect(res.signed_data).to.be.a(\"string\").and.to.not.be.empty;\r",
+							"    pm.expect(res.signature_counter).to.be.a(\"number\");\r",
+							"    pm.expect(res.last_signature).to.be.a(\"string\").and.to.not.be.empty;\r",
+							"});\r",
+							"\r",
+							"// signed_data: \"<counter>_<payload>_<previous_signature>\"                                                                                                                        \r",
+							"const signedData = res.signed_data;\r",
+							"const lastIdx = signedData.lastIndexOf(\"_\");\r",
+							"pm.test(\"signed_data contains previous signature reference\", function () {\r",
+							"    pm.expect(lastIdx, \"signed_data must contain two underscores\").to.be.above(0);\r",
+							"});\r",
+							"\r",
+							"const prefixSection = signedData.slice(0, lastIdx);\r",
+							"const embeddedLastSignature = signedData.slice(lastIdx + 1);\r",
+							"const payloadIdx = prefixSection.indexOf(\"_\");\r",
+							"\r",
+							"pm.test(\"signed_data embeds counter and payload\", function () {\r",
+							"    pm.expect(payloadIdx, \"signed_data must include counter and payload\").to.be.above(0);\r",
+							"});\r",
+							"\r",
+							"const counterBefore = parseInt(prefixSection.slice(0, payloadIdx), 10);\r",
+							"const payloadData = prefixSection.slice(payloadIdx + 1);\r",
+							"\r",
+							"pm.test(\"counter in signed_data is numeric\", function () {\r",
+							"    pm.expect(counterBefore).to.satisfy(Number.isInteger);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"payload portion is not empty\", function () {\r",
+							"    pm.expect(payloadData).to.be.a(\"string\").and.to.not.be.empty;\r",
+							"});\r",
+							"\r",
+							"// Counter increments after signing.                                                                                                                                              \r",
+							"pm.test(\"signature counter increments after signing\", function () {\r",
+							"    pm.expect(res.signature_counter).to.eql(counterBefore + 1);\r",
+							"});\r",
+							"\r",
+							"// last_signature equals freshly produced signature.                                                                                                                              \r",
+							"pm.test(\"last_signature matches returned signature\", function () {\r",
+							"    pm.expect(res.last_signature).to.eql(res.signature);\r",
+							"});\r",
+							"\r",
+							"// Optional sequential assertions using stored environment state.                                                                                                                 \r",
+							"const previousCounter = Number(pm.environment.get(\"device_ecc_counter\") || 0);\r",
+							"pm.test(\"counter increases sequentially\", function () {\r",
+							"    pm.expect(res.signature_counter).to.eql(previousCounter + 1);\r",
+							"});\r",
+							"\r",
+							"const previousLast = pm.environment.get(\"device_ecc_last_signature\");\r",
+							"if (previousLast) {\r",
+							"    pm.test(\"payload references previous signature\", function () {\r",
+							"        pm.expect(embeddedLastSignature).to.eql(previousLast);\r",
+							"    });\r",
+							"} else {\r",
+							"    const expectedInitial = Buffer.from(res.device_id).toString(\"base64\");\r",
+							"    pm.test(\"initial payload references base64(device id)\", function () {\r",
+							"        pm.expect(embeddedLastSignature).to.eql(expectedInitial);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"// Signature string should look base64 encoded (ECDSA output still encoded to base64).                                                                                            \r",
+							"pm.test(\"signature appears base64 encoded\", function () {\r",
+							"    pm.expect(res.signature).to.match(/^[A-Za-z0-9+/]+={0,2}$/);\r",
+							"});\r",
+							"\r",
+							"// Persist state for follow-up calls.                                                                                                                                             \r",
+							"pm.environment.set(\"device_ecc_counter\", res.signature_counter);\r",
+							"pm.environment.set(\"device_ecc_last_signature\", res.last_signature);"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"data\": \"receipt=84,amount=2499,currency=EUR\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v0/devices/{{device_ecc_id}}/sign",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v0",
+						"devices",
+						"{{device_ecc_id}}",
+						"sign"
+					]
+				},
+				"description": "Generated from cURL: curl -X POST \"http://localhost:8080/api/v0/devices/device-ecc-001/sign\" \\                                                                                                         \r\n    -H \"Content-Type: application/json\" \\                                                                                                                                           \r\n    -H \"Accept: application/json\" \\                                                                                                                                                 \r\n    -d '{\"data\":\"receipt=84,amount=2499,currency=EUR\"}'"
+			},
+			"response": []
+		},
+		{
+			"name": "Duplicate Device ID (Error)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"status is 409 Conflict\", function () {\r",
+							"    pm.response.to.have.status(409);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"content-type is application/json\", function () {\r",
+							"    const contentType = pm.response.headers.get(\"Content-Type\");\r",
+							"    pm.expect(contentType, \"Content-Type header present\").to.exist;\r",
+							"    pm.expect(contentType.toLowerCase()).to.include(\"application/json\");\r",
+							"});\r",
+							"\r",
+							"const body = pm.response.json();\r",
+							"\r",
+							"pm.test(\"error payload structure\", function () {\r",
+							"    pm.expect(body).to.have.property(\"errors\").that.is.an(\"array\").with.length.greaterThan(0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"duplicate device error message\", function () {\r",
+							"    pm.expect(body.errors[0]).to.eql(\"repository: signature device already exists\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"id\": \"{{device_rsa_id}}\",\n  \"algorithm\": \"rsa\"\n}\n"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v0/devices",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v0",
+						"devices"
+					]
+				},
+				"description": "Recreate the same device ID to demonstrate HTTP 409 conflict handling."
+			},
+			"response": []
+		},
+		{
+			"name": "Sign Missing Payload (Error)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"status is 400 Bad Request\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"content-type is application/json\", function () {\r",
+							"    const contentType = pm.response.headers.get(\"Content-Type\");\r",
+							"    pm.expect(contentType, \"Content-Type header present\").to.exist;\r",
+							"    pm.expect(contentType.toLowerCase()).to.include(\"application/json\");\r",
+							"});\r",
+							"\r",
+							"const body = pm.response.json();\r",
+							"\r",
+							"pm.test(\"error payload structure\", function () {\r",
+							"    pm.expect(body).to.have.property(\"errors\").that.is.an(\"array\").with.length.greaterThan(0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"empty payload validation message\", function () {\r",
+							"    pm.expect(body.errors[0]).to.eql(\"service: data to be signed must be non-empty\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"data\": \"\"\n}\n"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/v0/devices/{{device_rsa_id}}/sign",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"v0",
+						"devices",
+						"{{device_rsa_id}}",
+						"sign"
+					]
+				},
+				"description": "Trigger validation error (HTTP 400) by sending an empty signing payload."
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080"
+		},
+		{
+			"key": "device_rsa_id",
+			"value": "device-rsa-001"
+		},
+		{
+			"key": "device_ecc_id",
+			"value": "device-ecc-001"
+		}
+	]
+}
