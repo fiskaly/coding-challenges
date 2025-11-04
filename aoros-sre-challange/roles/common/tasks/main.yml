@@ -1,0 +1,7 @@
+- name: Include Debian/Ubuntu tasks
+  ansible.builtin.import_tasks: debian.yml
+  when: ansible_facts['os_family'] == 'Debian'
+
+- name: Include RedHat tasks
+  ansible.builtin.import_tasks: rhel.yml
+  when: ansible_facts['os_family'] == 'RedHat'
