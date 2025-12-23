@@ -1,0 +1,77 @@
+services:
+  # PostgreSQL database (shared by both backend options)
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: signature_service
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend-go/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      #- ./backend-ts/src/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  # Backend Go (Option A) - Comment out if using TypeScript
+  backend-go:
+    build: ./backend-go
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/signature_service?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend-go:/app
+    networks:
+      - app-network
+
+  # Backend TypeScript (Option B) - Uncomment if using TypeScript
+  # Comment out backend-go section above if using this
+  # backend-ts:
+  #   build: ./backend-ts
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     DATABASE_URL: postgresql://postgres:postgres@postgres:5432/signature_service
+  #     NODE_ENV: development
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   volumes:
+  #     - ./backend-ts:/app
+  #     - /app/node_modules
+  #   networks:
+  #     - app-network
+
+  # Frontend (Next.js)
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8080
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend-go  # Change to backend-ts if using TypeScript
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
