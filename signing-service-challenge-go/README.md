@@ -66,7 +66,7 @@ For now we need to provide two main operations to our customers:
 
 Think of how to expose these operations through a RESTful HTTP-based API.
 
-In addition, `list / retrieval operations` for the resources generated in the previous operations should be made available to the customers.
+In addition, `list / retrieval operations` for the devices generated in the `CreateSignatureDevice` operation should be made available to the customers.
 
 #### QA / Testing
 
